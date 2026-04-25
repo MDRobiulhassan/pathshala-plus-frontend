@@ -18,7 +18,7 @@ export default function ProtectedRoute({ children, allowedRole }: Props) {
 
     // ❌ Not logged in
     if (!token) {
-      router.push("/login")
+      router.push("/auth/login")
       return
     }
 

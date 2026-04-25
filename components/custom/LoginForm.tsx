@@ -1,52 +1,59 @@
 "use client"
 
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import { useState, type ChangeEvent, type ComponentProps, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 
 import { loginUser } from "@/lib/api"
-
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-const formSchema = z.object({
-  email: z.string().email("Invalid email"),
-  password: z.string().min(1, "Password required"),
-})
+type LoginValues = {
+  email: string
+  password: string
+}
 
-export default function LoginForm() {
+export default function LoginForm({
+  className,
+  ...props
+}: ComponentProps<"div">) {
   const router = useRouter()
-
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+  const [values, setValues] = useState<LoginValues>({
+    email: "",
+    password: "",
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  async function onSubmit(values: any) {
-    console.log("Submitting:", values)
+  const onInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = event.target
+    setValues((prev) => ({ ...prev, [id]: value }))
+  }
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    if (!values.email || !values.password) {
+      alert("Email and password are required")
+      return
+    }
+
     try {
+      setIsSubmitting(true)
       const data = await loginUser(values)
 
-      // ✅ Store auth data
       localStorage.setItem("accessToken", data.accessToken)
       localStorage.setItem("refreshToken", data.refreshToken)
       localStorage.setItem("userId", data.userId.toString())
       localStorage.setItem("role", data.role)
 
-      // ✅ Redirect
       if (data.role === "TEACHER") {
         router.push("/teacher")
       } else if (data.role === "STUDENT") {
@@ -57,54 +64,86 @@ export default function LoginForm() {
     } catch (error) {
       console.error(error)
       alert("Login failed")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   return (
-    <Card className="max-w-md w-full h-[20rem] mx-auto mt-20">
-      <CardHeader>
-        <CardTitle className="mx-autos">Login</CardTitle>
-      </CardHeader>
-
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="example@email.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button type="submit" className="w-full">
-              Login
-            </Button>
-
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card className="w-full max-w-8xl overflow-hidden p-0">
+        <CardContent className="grid p-0 md:grid-cols-2">
+          <form className="p-6 md:p-8" onSubmit={onSubmit}>
+            <FieldGroup>
+              <div className="flex flex-col items-center gap-2 text-center">
+                <h1 className="text-2xl font-bold">Welcome back</h1>
+                <p className="text-balance text-muted-foreground">
+                  Login to your Acme Inc account
+                </p>
+              </div>
+              <Field>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                  value={values.email}
+                  onChange={onInputChange}
+                />
+              </Field>
+              <Field>
+                <div className="flex items-center">
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <a
+                    href="#"
+                    className="ml-auto text-sm underline-offset-2 hover:underline"
+                  >
+                    Forgot your password?
+                  </a>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={values.password}
+                  onChange={onInputChange}
+                />
+              </Field>
+              <Field>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                  {isSubmitting ? "Logging in..." : "Login"}
+                </Button>
+              </Field>
+              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+                Or continue with
+              </FieldSeparator>
+              <Field>
+                <Button variant="outline" type="button" className="w-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path
+                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  <span className="sr-only">Login with Google</span>
+                </Button>
+              </Field>
+              <FieldDescription className="text-center">
+                Don&apos;t have an account? <a href="#">Sign up</a>
+              </FieldDescription>
+            </FieldGroup>
           </form>
-        </Form>
-      </CardContent>
-    </Card>
+          <div className="relative hidden bg-muted md:block">
+            <img
+              src="/placeholder.svg"
+              alt="Image"
+              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+            />
+          </div>
+        </CardContent>
+      </Card>
+      
+    </div>
   )
 }
