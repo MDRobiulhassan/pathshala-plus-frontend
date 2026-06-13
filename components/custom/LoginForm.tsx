@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, type ChangeEvent, type ComponentProps, type FormEvent } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 
 import { loginUser } from "@/lib/api"
@@ -71,7 +72,7 @@ export default function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="w-full max-w-8xl overflow-hidden p-0">
+      <Card className="w-full max-w-7xl overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-6 md:p-8" onSubmit={onSubmit}>
             <FieldGroup>
@@ -135,10 +136,11 @@ export default function LoginForm({
             </FieldGroup>
           </form>
           <div className="relative hidden bg-muted md:block">
-            <img
+            <Image
               src="/placeholder.svg"
-              alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              alt="Login illustration"
+              fill
+              className="object-cover dark:brightness-[0.2] dark:grayscale"
             />
           </div>
         </CardContent>
