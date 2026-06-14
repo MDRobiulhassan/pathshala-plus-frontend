@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, type ChangeEvent, type ComponentProps, type FormEvent } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 
 import { signupUser } from "@/lib/api"
@@ -252,10 +253,11 @@ export default function SignupForm({
           </form>
 
           <div className="relative hidden bg-muted md:block">
-            <img
+            <Image
               src="/placeholder.svg"
-              alt="Image"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              alt="Signup illustration"
+              fill
+              className="object-cover dark:brightness-[0.2] dark:grayscale"
             />
           </div>
         </CardContent>
