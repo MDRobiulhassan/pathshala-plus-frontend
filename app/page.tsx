@@ -13,10 +13,9 @@ export default function Home() {
       <SiteNav />
       <main>
         <HeroSection />
-         <QuickActions />
-         <WhyPathshala />
+        <QuickActions />
+        <WhyPathshala />
         <HowItWorks />
-
         <BuiltForLearners />
         <Pricing />
       </main>

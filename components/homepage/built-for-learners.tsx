@@ -75,7 +75,9 @@ export function BuiltForLearners() {
             className="
               mt-4
               max-w-[54rem]
-              text-[5.4rem]
+              text-5xl
+              sm:text-7xl
+              lg:text-[5.4rem]
               font-[800]
               leading-[0.95]
               text-white
@@ -253,7 +255,8 @@ function CtaCard() {
         <h3
           className="
             mt-6
-            text-[3.5rem]
+            text-4xl
+            sm:text-[3.5rem]
             font-[800]
             leading-[0.95]
             text-white

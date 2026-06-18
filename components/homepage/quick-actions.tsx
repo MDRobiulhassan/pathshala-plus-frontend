@@ -1,11 +1,5 @@
-import {
-  ArrowRight,
-  GraduationCap,
-  ClipboardList,
-  BarChart3,
-  Swords,
-  type LucideIcon,
-} from "lucide-react";
+import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 
 import {
   Reveal,
@@ -14,8 +8,7 @@ import {
 } from "@/components/homepage/reveal";
 
 type QuickAction = {
-  icon: LucideIcon;
-  iconColor: string;
+  iconPath: string;
   title: string;
   description: string;
   cta: string;
@@ -23,32 +16,28 @@ type QuickAction = {
 
 const actions: QuickAction[] = [
   {
-    icon: GraduationCap,
-    iconColor: "text-sky-400",
+    iconPath: "/icons/university.png",
     title: "Practice by Institute",
     description:
       "Filter questions by your university and practice MCQs.",
     cta: "Explore",
   },
   {
-    icon: ClipboardList,
-    iconColor: "text-rose-400",
+    iconPath: "/icons/exam-time.png",
     title: "Full Mock Test",
     description:
       "Simulate real exam conditions with full-length timed tests.",
     cta: "Start Test",
   },
   {
-    icon: BarChart3,
-    iconColor: "text-amber-400",
+    iconPath: "/icons/data-analytics.png",
     title: "View Progress",
     description:
       "Track your accuracy, time per question, and improvement.",
     cta: "View Stats",
   },
   {
-    icon: Swords,
-    iconColor: "text-emerald-400",
+    iconPath: "/icons/competition.png",
     title: "Duels 1v1",
     description:
       "Challenge a friend to a live head-to-head quiz battle.",
@@ -81,7 +70,9 @@ export function QuickActions() {
             className="
               mt-5
               max-w-[58rem]
-              text-[5.5rem]
+              text-5xl
+              sm:text-7xl
+              lg:text-[5.5rem]
               font-[800]
               leading-[0.96]
               text-white
@@ -138,8 +129,7 @@ export function QuickActions() {
 }
 
 function ActionBody({
-  icon: Icon,
-  iconColor,
+  iconPath,
   title,
   description,
   cta,
@@ -158,9 +148,12 @@ function ActionBody({
             bg-white/[0.03]
           "
         >
-          <Icon
-            aria-hidden="true"
-            className={`size-6 ${iconColor}`}
+          <Image
+            src={iconPath}
+            alt={title}
+            width={28}
+            height={28}
+            className="object-contain"
           />
         </div>
 

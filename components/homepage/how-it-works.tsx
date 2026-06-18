@@ -1,5 +1,6 @@
 import {
   ArrowRight,
+  Brain,
   Sparkles,
 } from "lucide-react";
 
@@ -92,7 +93,9 @@ export function HowItWorks() {
             className="
               mt-4
               max-w-[52rem]
-              text-[5.4rem]
+              text-5xl
+              sm:text-7xl
+              lg:text-[5.4rem]
               font-[800]
               leading-[0.95]
               text-white
@@ -113,6 +116,7 @@ export function HowItWorks() {
           className="
             mt-10
             grid
+            lg:items-stretch
             items-start
             gap-7
             lg:grid-cols-[1.15fr_0.85fr]
@@ -122,7 +126,7 @@ export function HowItWorks() {
           {/* LEFT SIDE */}
           <Stagger
             as="ol"
-            className="space-y-5"
+            className="flex flex-col gap-5 lg:h-full lg:justify-between lg:gap-0"
           >
             {steps.map((s) => (
               <StaggerItem
@@ -326,7 +330,7 @@ function SampleQuestion() {
             text-[#00D4C8]
           "
         >
-          <Sparkles className="size-3.5" />
+          <Brain className="size-3.5" />
           AI EXPLANATION
         </p>
 

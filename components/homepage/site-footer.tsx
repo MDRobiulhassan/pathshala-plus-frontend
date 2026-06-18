@@ -1,11 +1,8 @@
 "use client";
 
-import { Phone, Mail, MapPin } from "lucide-react";
-import {
-  FaFacebookF,
-  FaInstagram,
-  FaLinkedinIn,
-} from "react-icons/fa";
+import Image from "next/image";
+import { MapPin } from "lucide-react";
+import { FaInstagram } from "react-icons/fa";
 
 type LinkColumn = {
   title: string;
@@ -39,9 +36,8 @@ const columns: LinkColumn[] = [
 
 const socials = [
   {
-    icon: FaFacebookF,
+    iconPath: "/icons/facebook.png",
     label: "Facebook",
-    color: "text-[#1877f2]",
   },
   {
     icon: FaInstagram,
@@ -49,9 +45,8 @@ const socials = [
     color: "text-[#e1306c]",
   },
   {
-    icon: FaLinkedinIn,
+    iconPath: "/icons/linkedin.png",
     label: "LinkedIn",
-    color: "text-[#0a66c2]",
   },
 ];
 
@@ -88,17 +83,33 @@ function BrandColumn() {
 
       <ul className="mt-8 space-y-4 text-sm text-white/65">
         <li className="flex items-center gap-3">
-          <Phone className="size-4 text-cyan-400" />
+          <div className="flex h-5 w-5 items-center justify-center shrink-0">
+            <Image
+              src="/icons/phone (1).png"
+              alt="Phone"
+              width={16}
+              height={16}
+              className="object-contain"
+            />
+          </div>
           1-088-Odyssey
         </li>
 
         <li className="flex items-center gap-3">
-          <Mail className="size-4 text-cyan-400" />
+          <div className="flex h-5 w-5 items-center justify-center shrink-0">
+            <Image
+              src="/icons/mail (1).png"
+              alt="Email"
+              width={16}
+              height={16}
+              className="object-contain"
+            />
+          </div>
           odysseyofficial.dev@gmail.com
         </li>
 
         <li className="flex items-center gap-3">
-          <MapPin className="size-4 text-cyan-400" />
+          <MapPin className="size-4 text-cyan-400 shrink-0" />
           Chattogram, Bangladesh
         </li>
       </ul>
@@ -138,14 +149,24 @@ function LinkGrid() {
         </p>
 
         <ul className="flex items-center gap-3">
-          {socials.map(({ icon: Icon, label, color }) => (
-            <li key={label}>
+          {socials.map((social) => (
+            <li key={social.label}>
               <a
                 href="#"
-                aria-label={label}
-                className="flex size-9 items-center justify-center rounded-full bg-white/95 transition-all duration-200 hover:scale-105 hover:bg-white"
+                aria-label={social.label}
+                className="flex size-9 items-center justify-center rounded-full bg-white/95 transition-all duration-200 hover:scale-105 hover:bg-white overflow-hidden"
               >
-                <Icon className={`size-4 ${color}`} />
+                {social.iconPath ? (
+                  <Image
+                    src={social.iconPath}
+                    alt={social.label}
+                    width={18}
+                    height={18}
+                    className="object-contain"
+                  />
+                ) : social.icon ? (
+                  <social.icon className={`size-4 ${social.color}`} />
+                ) : null}
               </a>
             </li>
           ))}
