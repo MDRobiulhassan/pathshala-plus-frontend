@@ -99,7 +99,9 @@ function HeroCopy() {
         {...fade(0)}
         className="
           max-w-[42.5rem]
-          text-[6.25rem]
+          text-5xl
+          sm:text-7xl
+          lg:text-[6.25rem]
           font-[800]
           leading-[0.96]
           text-white

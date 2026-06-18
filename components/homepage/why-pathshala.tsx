@@ -1,11 +1,4 @@
-import {
-  Library,
-  ClipboardCheck,
-  BarChart3,
-  Bot,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
+import Image from "next/image";
 
 import {
   Reveal,
@@ -14,8 +7,7 @@ import {
 } from "@/components/homepage/reveal";
 
 type Feature = {
-  icon: LucideIcon;
-  iconColor: string;
+  iconPath: string;
   title: string;
   description: string;
   upcoming?: boolean;
@@ -23,38 +15,33 @@ type Feature = {
 
 const features: Feature[] = [
   {
-    icon: Library,
-    iconColor: "text-rose-400",
+    iconPath: "/icons/university.png",
     title: "Question Bank",
     description:
       "Thousands of verified MCQs across all subjects, updated and verified regularly.",
   },
   {
-    icon: ClipboardCheck,
-    iconColor: "text-amber-400",
+    iconPath: "/icons/exam-time.png",
     title: "Mock Tests",
     description:
       "Full-length tests that replicate real exam experience under time pressure.",
   },
   {
-    icon: BarChart3,
-    iconColor: "text-emerald-400",
+    iconPath: "/icons/analysis.png",
     title: "Analysis",
     description:
       "Deep analytics revealing your weak spots and growth trajectory over time.",
     upcoming: true,
   },
   {
-    icon: Bot,
-    iconColor: "text-sky-400",
+    iconPath: "/icons/ai.png",
     title: "AI Explanations",
     description:
       "Instant AI-powered explanations for every question — right or wrong.",
     upcoming: true,
   },
   {
-    icon: Users,
-    iconColor: "text-violet-400",
+    iconPath: "/icons/classroom.png",
     title: "Batch System",
     description:
       "Structured batches led by top educators for guided, focused exam prep.",
@@ -81,13 +68,15 @@ export function WhyPathshala() {
           >
             Why Pathshala?
           </p>
-
+ 
           <h2
             id="why-pathshala-heading"
             className="
               mt-5
               max-w-[58rem]
-              text-[5.5rem]
+              text-5xl
+              sm:text-7xl
+              lg:text-[5.5rem]
               font-[800]
               leading-[0.96]
               text-white
@@ -145,8 +134,7 @@ export function WhyPathshala() {
 }
 
 function FeatureBody({
-  icon: Icon,
-  iconColor,
+  iconPath,
   title,
   description,
   upcoming,
@@ -187,9 +175,12 @@ function FeatureBody({
           bg-white/[0.03]
         "
       >
-        <Icon
-          aria-hidden="true"
-          className={`size-6 ${iconColor}`}
+        <Image
+          src={iconPath}
+          alt={title}
+          width={28}
+          height={28}
+          className="object-contain"
         />
       </div>
 

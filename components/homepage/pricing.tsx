@@ -1,6 +1,6 @@
 import {
   Check,
-  Sparkles,
+  Flame,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -93,7 +93,9 @@ export function Pricing() {
             id="pricing-heading"
             className="
               mt-4
-              text-[5.2rem]
+              text-5xl
+              sm:text-7xl
+              lg:text-[5.2rem]
               font-[800]
               leading-[0.95]
               text-white
@@ -200,7 +202,7 @@ function PlanBody({
             text-black
           "
         >
-          <Sparkles
+          <Flame
             aria-hidden="true"
             className="size-3.5"
           />
