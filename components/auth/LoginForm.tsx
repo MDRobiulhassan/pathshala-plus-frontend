@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import Link from "next/link"
+import { googleAuth } from "@/lib/api"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -58,9 +60,9 @@ export default function LoginForm({
       setIsSubmitting(true)
       const data = await loginUser(values)
 
-      localStorage.setItem("accessToken", data.accessToken)
-      localStorage.setItem("refreshToken", data.refreshToken)
-      localStorage.setItem("userId", data.userId.toString())
+      console.log("LOGIN RESPONSE", data)
+
+      localStorage.setItem("id", data.id.toString())
       localStorage.setItem("role", data.role)
 
       if (data.role === "TEACHER") {
@@ -72,7 +74,12 @@ export default function LoginForm({
       }
     } catch (error) {
       console.error(error)
-      alert("Login failed")
+
+      if (error instanceof Error) {
+        alert(error.message)
+      } else {
+        alert("Login failed")
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -188,12 +195,12 @@ export default function LoginForm({
                   <Label htmlFor="password" className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
                     Password
                   </Label>
-                  <a
-                    href="#"
+                  <Link
+                    href="/auth/forgot-password"
                     className={cn(dmSans.className, "text-[12px] text-[#14B8A6] hover:underline font-[500] transition-all")}
                   >
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
                 <div className="relative w-full">
                   <Input
@@ -246,6 +253,7 @@ export default function LoginForm({
               {/* Google Button */}
               <Button
                 type="button"
+                onClick={googleAuth}
                 className={cn(
                   dmSans.className,
                   "w-full h-[44px] rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] text-white hover:bg-white/[0.06] flex items-center justify-center gap-[10px] text-[14px] font-[500] transition-all duration-200 cursor-pointer"
@@ -275,9 +283,12 @@ export default function LoginForm({
               {/* Redirect to Signup */}
               <p className="text-[14px] font-[300] text-white text-center mt-[4px]">
                 Don&apos;t have an account?{" "}
-                <a href="/auth/signup" className="text-[#14B8A6] font-[600] hover:underline transition-all">
+                <Link
+                  href="/auth/signup"
+                  className="text-[#14B8A6] font-[600] hover:underline transition-all"
+                >
                   Sign Up
-                </a>
+                </Link>
               </p>
 
             </div>
