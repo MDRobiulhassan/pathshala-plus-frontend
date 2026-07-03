@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type ChangeEvent, type ComponentProps, type FormEvent } from "react"
+import { useState, useEffect, type ChangeEvent, type ComponentProps, type FormEvent } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { DM_Sans, Fredoka } from "next/font/google"
@@ -8,7 +8,14 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react"
-import { signupUser } from "@/lib/api"
+import {
+  signupUser,
+  getEducationLevels,
+  EducationLevelVariant,
+  getLanguages,
+  EducationLevel,
+  Language,
+} from "@/lib/api"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { googleAuth } from "@/lib/api"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -38,9 +46,9 @@ type SignupValues = {
   email: string
   password: string
   confirmPassword: string
-  role: "STUDENT" | "TEACHER"
-  preferredLanguageCode: "EN" | "HI"
+  preferredLanguageCode: string
   educationLevelId: string
+  role: "STUDENT" | "TEACHER"
 }
 
 export default function SignupForm({
@@ -53,13 +61,46 @@ export default function SignupForm({
     email: "",
     password: "",
     confirmPassword: "",
-    role: "STUDENT",
     preferredLanguageCode: "EN",
     educationLevelId: "",
+    role: "STUDENT",
+
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [educationLevels, setEducationLevels] =
+    useState<EducationLevel[]>([])
+
+  const [languages, setLanguages] =
+    useState<Language[]>([])
+
+  const [departmentOptions, setDepartmentOptions] =
+    useState<EducationLevelVariant[]>([])
+
+  const [selectedDepartmentId, setSelectedDepartmentId] =
+    useState("")
+  const [selectedEducationLevel, setSelectedEducationLevel] =
+    useState("")
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [levels, langs] = await Promise.all([
+          getEducationLevels(),
+          getLanguages(),
+        ])
+
+        setEducationLevels(levels)
+        setLanguages(langs)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    loadData()
+  }, [])
+
 
   const onInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { id, value } = event.target
@@ -74,8 +115,13 @@ export default function SignupForm({
       return
     }
 
-    if (values.password.length < 8) {
-      alert("Password must be at least 8 characters")
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$/
+
+    if (!passwordRegex.test(values.password)) {
+      alert(
+        "Password must contain uppercase, lowercase, number and special character"
+      )
       return
     }
 
@@ -84,17 +130,33 @@ export default function SignupForm({
       return
     }
 
+    if (!values.educationLevelId) {
+      if (departmentOptions.length > 0) {
+        alert("Please select a department.")
+      } else {
+        alert("Please select an education level.")
+      }
+      return
+    }
+
     try {
       setIsSubmitting(true)
+
       const data = await signupUser({
         ...values,
-        educationLevelId: values.educationLevelId ? Number(values.educationLevelId) : null,
+        educationLevelId: Number(values.educationLevelId),
       })
 
-      localStorage.setItem("accessToken", data.accessToken)
-      localStorage.setItem("refreshToken", data.refreshToken)
-      localStorage.setItem("userId", data.userId.toString())
-      localStorage.setItem("role", data.role)
+
+      localStorage.setItem(
+        "userId",
+        data.userId.toString()
+      )
+
+      localStorage.setItem(
+        "role",
+        data.role
+      )
 
       if (data.role === "TEACHER") {
         router.push("/teacher")
@@ -103,7 +165,12 @@ export default function SignupForm({
       }
     } catch (error) {
       console.error(error)
-      alert("Signup failed")
+
+      if (error instanceof Error) {
+        alert(error.message)
+      } else {
+        alert("Signup failed")
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -257,8 +324,15 @@ export default function SignupForm({
                       <SelectValue placeholder="Select language" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#0C1120] border-white/10 text-white">
-                      <SelectItem value="EN" className="focus:bg-white/10 focus:text-white cursor-pointer">English</SelectItem>
-                      <SelectItem value="HI" className="focus:bg-white/10 focus:text-white cursor-pointer">Hindi</SelectItem>
+                      {languages.map((language) => (
+                        <SelectItem
+                          key={language.id}
+                          value={language.code}
+                          className="focus:bg-white/10 focus:text-white cursor-pointer"
+                        >
+                          {language.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -268,25 +342,98 @@ export default function SignupForm({
                     Education Level
                   </Label>
                   <Select
-                    value={values.educationLevelId || undefined}
-                    onValueChange={(value) =>
+                    value={selectedEducationLevel}
+                    onValueChange={(value) => {
+                      setSelectedEducationLevel(value)
+
+                      const selectedLevel = educationLevels.find(
+                        (level) => level.name === value
+                      )
+
+                      if (!selectedLevel) return
+
+                      // reset previous department
+                      setSelectedDepartmentId("")
                       setValues((prev) => ({
                         ...prev,
-                        educationLevelId: value,
+                        educationLevelId: "",
                       }))
-                    }
+
+                      // show department dropdown whenever variants exist
+                      setDepartmentOptions(selectedLevel.variants)
+                    }}
                   >
-                    <SelectTrigger className={cn("h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] px-4 py-3 text-white text-[14px] font-[400] transition-all duration-200 cursor-pointer", focusRingClasses)}>
+                    <SelectTrigger
+                      className={cn(
+                        "h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] px-4 py-3 text-white text-[14px] font-[400] transition-all duration-200 cursor-pointer",
+                        focusRingClasses
+                      )}
+                    >
                       <SelectValue placeholder="Select education level" />
                     </SelectTrigger>
+
                     <SelectContent className="bg-[#0C1120] border-white/10 text-white">
-                      <SelectItem value="1" className="focus:bg-white/10 focus:text-white cursor-pointer">School</SelectItem>
-                      <SelectItem value="2" className="focus:bg-white/10 focus:text-white cursor-pointer">College</SelectItem>
-                      <SelectItem value="3" className="focus:bg-white/10 focus:text-white cursor-pointer">Graduate</SelectItem>
+                      {educationLevels.map((level) => (
+                        <SelectItem
+                          key={level.name}
+                          value={level.name}
+                          className="focus:bg-white/10 focus:text-white cursor-pointer"
+                        >
+                          {level.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+
+              {/* Department Selector (conditionally shown when multiple variants) */}
+              {departmentOptions.length > 0 && (
+                <div className="flex flex-col gap-[4px] w-full">
+                  <Label
+                    className={cn(
+                      dmSans.className,
+                      "text-[12px] font-[700] tracking-[0.57px] text-white"
+                    )}
+                  >
+                    Department
+                  </Label>
+
+                  <Select
+                    value={selectedDepartmentId}
+                    onValueChange={(value) => {
+                      setSelectedDepartmentId(value)
+
+                      setValues((prev) => ({
+                        ...prev,
+                        educationLevelId: value,
+                      }))
+                    }}
+                  >
+                    <SelectTrigger
+                      className={cn(
+                        "h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] px-4 py-3 text-white text-[14px] font-[400] transition-all duration-200 cursor-pointer",
+                        focusRingClasses
+                      )}
+                    >
+                      <SelectValue placeholder="Select department" />
+                    </SelectTrigger>
+
+                    <SelectContent className="bg-[#0C1120] border-white/10 text-white">
+                      {departmentOptions.map((variant) => (
+                        <SelectItem
+                          key={variant.id}
+                          value={variant.id.toString()}
+                          className="focus:bg-white/10 focus:text-white cursor-pointer"
+                        >
+                          {variant.department ?? "General"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
 
               {/* Role Selector */}
               <div className="flex flex-col gap-[4px] w-full">
@@ -350,6 +497,7 @@ export default function SignupForm({
               {/* Google Button */}
               <Button
                 type="button"
+                onClick={googleAuth}
                 className={cn(
                   dmSans.className,
                   "w-full h-[44px] rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] text-white hover:bg-white/[0.06] flex items-center justify-center gap-[10px] text-[14px] font-[500] transition-all duration-200 cursor-pointer"

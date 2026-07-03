@@ -1,4 +1,4 @@
-import ProtectedRoute from "@/components/custom/ProtectedRoute"
+import ProtectedRoute from "@/components/auth/ProtectedRoute"
 
 export default function TeacherPage() {
   return (
