@@ -271,3 +271,20 @@ export async function getLanguages(): Promise<Language[]> {
   const response = await res.json()
   return response.data
 }
+
+
+// -----------------------------
+// Student Dashboard
+// -----------------------------
+
+export async function getStudentDashboard() {
+  try {
+    const response = await api.get("/dashboard/student")
+    return response.data.data
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.error?.message ??
+      "Failed to fetch dashboard"
+    )
+  }
+}
