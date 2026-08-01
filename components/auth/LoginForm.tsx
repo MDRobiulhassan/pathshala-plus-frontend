@@ -60,7 +60,6 @@ export default function LoginForm({
       setIsSubmitting(true)
       const data = await loginUser(values)
 
-      console.log("LOGIN RESPONSE", data)
 
       localStorage.setItem("id", data.id.toString())
       localStorage.setItem("role", data.role)

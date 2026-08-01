@@ -325,3 +325,36 @@ export type UpdateProfileRequest = Partial<{
   newPassword: string
   confirmNewPassword: string
 }>
+
+/** Uploads a new profile avatar image and returns the resulting URL. */
+export async function uploadAvatar(file: File): Promise<string> {
+  const formData = new FormData()
+  formData.append("file", file)
+
+  try {
+    const response = await api.post("/users/me/avatar", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    return response.data.data
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.error?.message ?? "Failed to upload avatar"
+    )
+  }
+}
+
+// -----------------------------
+// Student Dashboard
+// -----------------------------
+
+export async function getStudentDashboard() {
+  try {
+    const response = await api.get("/dashboard/student")
+    return response.data.data
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.error?.message ??
+      "Failed to fetch dashboard"
+    )
+  }
+}
