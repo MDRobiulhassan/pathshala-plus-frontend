@@ -25,7 +25,7 @@ import {
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  weight: ["400", "500", "700", "800"],
   variable: "--font-dm-sans",
 })
 
@@ -37,10 +37,18 @@ type ProfileInfoFormProps = {
   onUpdated: (updated: UserProfileResponse) => void
 }
 
+function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-[20px] border-[0.8px] border-white/6 bg-[#0C1120] p-6">
+      <h3 className={cn(dmSans.className, "text-white text-[16px] font-[800] mb-4")}>{title}</h3>
+      {children}
+    </div>
+  )
+}
+
 export default function ProfileInfoForm({ profile, onUpdated }: ProfileInfoFormProps) {
   const [name, setName] = useState(profile.name ?? "")
   const [phone, setPhone] = useState(profile.phone ?? "")
-  const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl ?? "")
 
   const [languages, setLanguages] = useState<Language[]>([])
   const [educationLevels, setEducationLevels] = useState<EducationLevel[]>([])
@@ -85,7 +93,6 @@ export default function ProfileInfoForm({ profile, onUpdated }: ProfileInfoFormP
     const { id, value } = event.target
     if (id === "name") setName(value)
     if (id === "phone") setPhone(value)
-    if (id === "avatarUrl") setAvatarUrl(value)
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -97,7 +104,7 @@ export default function ProfileInfoForm({ profile, onUpdated }: ProfileInfoFormP
     }
 
     if (selectedEducationLevel && departmentOptions.length > 0 && !selectedDepartmentId) {
-      alert("Please select a department")
+      alert("Please select a group/department")
       return
     }
 
@@ -106,7 +113,6 @@ export default function ProfileInfoForm({ profile, onUpdated }: ProfileInfoFormP
       const updated = await updateProfile({
         name,
         phone: phone || undefined,
-        avatarUrl: avatarUrl || undefined,
         preferredLanguageCode: preferredLanguageCode || undefined,
         educationLevelId: selectedDepartmentId ? Number(selectedDepartmentId) : undefined,
       })
@@ -122,84 +128,127 @@ export default function ProfileInfoForm({ profile, onUpdated }: ProfileInfoFormP
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-[16px] w-full">
-      <div className="flex flex-col text-left mb-2">
-        <h2 className={cn(dmSans.className, "text-[#F8FAFC] text-[24px] font-[800] tracking-[-0.5px]")}>
-          Profile Information
-        </h2>
-        <p className={cn(dmSans.className, "text-[13px] font-[400] text-[#F8FAFC]/55 mt-1")}>
-          Update your personal details and preferences.
-        </p>
-      </div>
+      <SectionCard title="Personal Details">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+          <div className="flex flex-col gap-[4px]">
+            <Label className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
+              Email
+            </Label>
+            <Input
+              type="email"
+              value={profile.email}
+              disabled
+              className="h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.015] px-4 py-3 text-white/40 text-[14px] font-[400] cursor-not-allowed"
+            />
+          </div>
+          <div className="flex flex-col gap-[4px]">
+            <Label htmlFor="name" className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
+              Full Name
+            </Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="John Doe"
+              required
+              value={name}
+              onChange={onTextChange}
+              className={cn(
+                "h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] px-4 py-3 placeholder-[#334155] text-white text-[14px] font-[400] focus:outline-none transition-all duration-200",
+                focusRingClasses
+              )}
+            />
+          </div>
+          <div className="flex flex-col gap-[4px]">
+            <Label htmlFor="phone" className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
+              Phone
+            </Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="+880 1XXXXXXXXX"
+              value={phone}
+              onChange={onTextChange}
+              className={cn(
+                "h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] px-4 py-3 placeholder-[#334155] text-white text-[14px] font-[400]",
+                focusRingClasses
+              )}
+            />
+          </div>
+        </div>
+      </SectionCard>
 
-      <div className="flex flex-col gap-[4px] w-full">
-        <Label className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
-          Email Address
-        </Label>
-        <Input
-          type="email"
-          value={profile.email}
-          disabled
-          className="h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.015] px-4 py-3 text-white/40 text-[14px] font-[400] cursor-not-allowed"
-        />
-      </div>
+      <SectionCard title="Academics">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+          <div className="flex flex-col gap-[4px]">
+            <Label className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
+              Education Level
+            </Label>
+            <Select
+              value={selectedEducationLevel}
+              onValueChange={(value) => {
+                setSelectedEducationLevel(value)
+                setSelectedDepartmentId("")
+                const level = educationLevels.find((lvl) => lvl.name === value)
+                setDepartmentOptions(level ? level.variants : [])
+              }}
+            >
+              <SelectTrigger
+                className={cn(
+                  "h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] px-4 py-3 text-white text-[14px] font-[400] transition-all duration-200 cursor-pointer",
+                  focusRingClasses
+                )}
+              >
+                <SelectValue placeholder="Select education level" />
+              </SelectTrigger>
+              <SelectContent className="bg-[#0C1120] border-white/10 text-white">
+                {educationLevels.map((level) => (
+                  <SelectItem
+                    key={level.name}
+                    value={level.name}
+                    className="focus:bg-white/10 focus:text-white cursor-pointer"
+                  >
+                    {level.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      <div className="flex flex-col gap-[4px] w-full">
-        <Label htmlFor="name" className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
-          Full Name
-        </Label>
-        <Input
-          id="name"
-          type="text"
-          placeholder="John Doe"
-          required
-          value={name}
-          onChange={onTextChange}
-          className={cn(
-            "h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] px-4 py-3 placeholder-[#334155] text-white text-[14px] font-[400] focus:outline-none transition-all duration-200",
-            focusRingClasses
+          {departmentOptions.length > 0 && (
+            <div className="flex flex-col gap-[4px]">
+              <Label className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
+                Group
+              </Label>
+              <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
+                <SelectTrigger
+                  className={cn(
+                    "h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] px-4 py-3 text-white text-[14px] font-[400] transition-all duration-200 cursor-pointer",
+                    focusRingClasses
+                  )}
+                >
+                  <SelectValue placeholder="Select group" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#0C1120] border-white/10 text-white">
+                  {departmentOptions.map((variant) => (
+                    <SelectItem
+                      key={variant.id}
+                      value={variant.id.toString()}
+                      className="focus:bg-white/10 focus:text-white cursor-pointer"
+                    >
+                      {variant.department ?? "General"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           )}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px] w-full">
-        <div className="flex flex-col gap-[4px]">
-          <Label htmlFor="phone" className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
-            Phone Number
-          </Label>
-          <Input
-            id="phone"
-            type="tel"
-            placeholder="+880 1XXXXXXXXX"
-            value={phone}
-            onChange={onTextChange}
-            className={cn(
-              "h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] px-4 py-3 placeholder-[#334155] text-white text-[14px] font-[400]",
-              focusRingClasses
-            )}
-          />
         </div>
-        <div className="flex flex-col gap-[4px]">
-          <Label htmlFor="avatarUrl" className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
-            Avatar URL
-          </Label>
-          <Input
-            id="avatarUrl"
-            type="url"
-            placeholder="https://..."
-            value={avatarUrl}
-            onChange={onTextChange}
-            className={cn(
-              "h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] px-4 py-3 placeholder-[#334155] text-white text-[14px] font-[400]",
-              focusRingClasses
-            )}
-          />
-        </div>
-      </div>
+      </SectionCard>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px] w-full">
-        <div className="flex flex-col gap-[4px]">
+      <SectionCard title="Preferences">
+        <div className="flex flex-col gap-[4px] max-w-[300px]">
           <Label className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
-            Preferred Language
+            Language
           </Label>
           <Select value={preferredLanguageCode} onValueChange={setPreferredLanguageCode}>
             <SelectTrigger
@@ -223,78 +272,14 @@ export default function ProfileInfoForm({ profile, onUpdated }: ProfileInfoFormP
             </SelectContent>
           </Select>
         </div>
-
-        <div className="flex flex-col gap-[4px]">
-          <Label className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
-            Education Level
-          </Label>
-          <Select
-            value={selectedEducationLevel}
-            onValueChange={(value) => {
-              setSelectedEducationLevel(value)
-              setSelectedDepartmentId("")
-              const level = educationLevels.find((lvl) => lvl.name === value)
-              setDepartmentOptions(level ? level.variants : [])
-            }}
-          >
-            <SelectTrigger
-              className={cn(
-                "h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] px-4 py-3 text-white text-[14px] font-[400] transition-all duration-200 cursor-pointer",
-                focusRingClasses
-              )}
-            >
-              <SelectValue placeholder="Select education level" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#0C1120] border-white/10 text-white">
-              {educationLevels.map((level) => (
-                <SelectItem
-                  key={level.name}
-                  value={level.name}
-                  className="focus:bg-white/10 focus:text-white cursor-pointer"
-                >
-                  {level.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {departmentOptions.length > 0 && (
-        <div className="flex flex-col gap-[4px] w-full">
-          <Label className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
-            Department
-          </Label>
-          <Select value={selectedDepartmentId} onValueChange={setSelectedDepartmentId}>
-            <SelectTrigger
-              className={cn(
-                "h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] px-4 py-3 text-white text-[14px] font-[400] transition-all duration-200 cursor-pointer",
-                focusRingClasses
-              )}
-            >
-              <SelectValue placeholder="Select department" />
-            </SelectTrigger>
-            <SelectContent className="bg-[#0C1120] border-white/10 text-white">
-              {departmentOptions.map((variant) => (
-                <SelectItem
-                  key={variant.id}
-                  value={variant.id.toString()}
-                  className="focus:bg-white/10 focus:text-white cursor-pointer"
-                >
-                  {variant.department ?? "General"}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+      </SectionCard>
 
       <Button
         type="submit"
         disabled={isSubmitting || isLoadingOptions}
         className={cn(
           dmSans.className,
-          "w-full md:w-fit md:self-end h-[44px] px-8 rounded-[12px] bg-[#14B8A6] text-[#060910] hover:bg-[#14B8A6]/90 font-[900] text-[14px] uppercase tracking-wider shadow-[0_0_22px_rgba(20,184,166,0.25)] border-none transition-all duration-200 cursor-pointer disabled:opacity-50 mt-2"
+          "w-full md:w-fit md:self-end h-[44px] px-8 rounded-[12px] bg-[#14B8A6] text-[#060910] hover:bg-[#14B8A6]/90 font-[900] text-[14px] uppercase tracking-wider shadow-[0_0_22px_rgba(20,184,166,0.25)] border-none transition-all duration-200 cursor-pointer disabled:opacity-50"
         )}
       >
         {isSubmitting ? "Saving..." : "Save Changes"}

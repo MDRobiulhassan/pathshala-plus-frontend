@@ -139,24 +139,29 @@ export default function UserDropdown() {
                         </p>
                     </div>
 
-                    <button
-                        className="
-              flex
-              w-full
-              items-center
-              gap-3
-              px-5
-              py-3
-              text-sm
-              text-white
-              hover:bg-white/5
-              transition
-            "
-                    >
-                        <User size={17} />
+                <button
+    onClick={() => {
+        setOpen(false)
+        const destination = profile?.roles?.includes("TEACHER") ? "/teacher/profile" : "/student/profile"
+        router.push(destination)
+    }}
+    className="
+      flex
+      w-full
+      items-center
+      gap-3
+      px-5
+      py-3
+      text-sm
+      text-white
+      hover:bg-white/5
+      transition
+    "
+>
+    <User size={17} />
 
-                        Profile
-                    </button>
+    Profile
+</button>
 
                     <button
                         className="
