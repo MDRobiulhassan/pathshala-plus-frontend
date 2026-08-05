@@ -4,14 +4,24 @@ import { useEffect, useState } from "react";
 import { getProfile } from "@/lib/api";
 
 export type UserProfile = {
-    id: number;
-    name: string;
-    email: string;
-    avatarUrl: string | null;
-    preferredLanguage: string;
-    educationLevel: string;
-    roles: string[];
-};
+    id: number
+    name: string
+    email: string
+    phone: string | null
+    avatarUrl: string | null
+
+    preferredLanguage: string
+
+    educationLevel: string
+    department: string | null
+
+    isActive: boolean
+    lastLoginAt: string | null
+
+    providers: string[]
+
+    roles: string[]
+}
 
 export function useProfile() {
     const [profile, setProfile] = useState<UserProfile | null>(null);
