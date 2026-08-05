@@ -85,7 +85,7 @@ export default function SecurityForm() {
         </h3>
 
         <div className="flex flex-col gap-[14px]">
-          <div className="flex flex-col gap-[4px] w-full max-w-[400px]">
+          <div className="flex flex-col gap-[4px] w-full">
             <Label htmlFor="currentPassword" className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
               Current Password
             </Label>
