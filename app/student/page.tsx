@@ -8,14 +8,15 @@ import AccuracyCard from "@/components/dashboard/sections/AccuracyCard";
 import RecentTestsCard from "@/components/dashboard/sections/RecentTestsCard";
 
 import { useDashboard } from "@/hooks/useDashboard";
+import Loader from "@/components/ui/Loader";
 
 export default function StudentPage() {
   const { dashboard, loading } = useDashboard();
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20 text-white">
-        Loading...
+      <div className="flex min-h-[300px] items-center justify-center">
+        <Loader />
       </div>
     );
   }
