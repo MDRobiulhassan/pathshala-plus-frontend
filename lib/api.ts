@@ -37,6 +37,45 @@ export type Language = {
   name: string
   code: string
 }
+
+/** Supported authentication providers. */
+export type Provider = "GOOGLE" | "FACEBOOK"
+
+/** Available user roles. */
+export type RoleName =
+  | "STUDENT"
+  | "TEACHER"
+  | "CONTENT_ADMIN"
+  | "SUPER_ADMIN"
+
+/** User profile returned by the API. */
+export type UserProfileResponse = {
+  id: number
+  name: string
+  email: string
+  phone: string | null
+  avatarUrl: string | null
+  preferredLanguage: string
+  educationLevel: string | null
+  department: string | null
+  isActive: boolean
+  lastLoginAt: string | null
+  providers: Provider[]
+  roles: RoleName[]
+}
+
+/** Request payload for updating user profile fields. */
+export type UpdateProfileRequest = Partial<{
+  name: string
+  phone: string
+  preferredLanguageCode: string
+  educationLevelId: number
+  avatarUrl: string
+  currentPassword: string
+  newPassword: string
+  confirmNewPassword: string
+}>
+
 // -----------------------------
 // Question Bank Types
 // -----------------------------
@@ -152,11 +191,6 @@ export type ExamQuestionResponse = {
 // Helpers
 // -----------------------------
 
-
-
-
-
-
 // -----------------------------
 // Signup API
 // -----------------------------
@@ -221,6 +255,39 @@ export async function getProfile() {
     throw new Error(
       error.response?.data?.error?.message ??
       "Failed to fetch profile"
+    )
+  }
+}
+
+/** Updates the authenticated user's profile. */
+export async function updateProfile(
+  data: UpdateProfileRequest
+): Promise<UserProfileResponse> {
+  try {
+    const response = await api.patch("/users/me", data)
+    return response.data.data
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.error?.message ??
+      error.response?.data?.message ??
+      "Failed to update profile"
+    )
+  }
+}
+
+/** Uploads a new profile avatar image and returns the resulting URL. */
+export async function uploadAvatar(file: File): Promise<string> {
+  const formData = new FormData()
+  formData.append("file", file)
+
+  try {
+    const response = await api.post("/users/me/avatar", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+    return response.data.data
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.error?.message ?? "Failed to upload avatar"
     )
   }
 }
@@ -382,7 +449,6 @@ export async function getLanguages(): Promise<Language[]> {
   const response = await res.json()
   return response.data
 }
-
 
 // -----------------------------
 // Student Dashboard

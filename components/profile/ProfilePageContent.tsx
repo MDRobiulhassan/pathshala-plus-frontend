@@ -1,0 +1,61 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { getProfile, UserProfileResponse } from "@/lib/api"
+import ProfilePhotoHeader from "./ProfilePhotoHeader"
+import ProfileInfoForm from "./ProfileInfoForm"
+import SecurityForm from "./SecurityForm"
+
+export default function ProfilePageContent() {
+  const [profile, setProfile] = useState<UserProfileResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const data = await getProfile()
+        setProfile(data)
+      } catch (error) {
+        console.error(error)
+        setLoadError(error instanceof Error ? error.message : "Failed to load profile")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadProfile()
+  }, [])
+
+  return (
+    <div className="max-w-[640px] mx-auto py-6 flex flex-col gap-6">
+      {isLoading && (
+        <div className="flex items-center justify-center h-[300px] text-white/50">
+          Loading your profile...
+        </div>
+      )}
+
+      {!isLoading && loadError && (
+        <div className="flex flex-col items-center justify-center h-[300px] gap-3 text-center">
+          <p className="text-red-400 text-[14px]">{loadError}</p>
+          <p className="text-white/40 text-[13px]">
+            Try refreshing the page, or log in again if the problem continues.
+          </p>
+        </div>
+      )}
+
+      {!isLoading && !loadError && profile && (
+        <>
+          <ProfilePhotoHeader
+            name={profile.name}
+            avatarUrl={profile.avatarUrl}
+            onAvatarUpdated={(newUrl) =>
+              setProfile((prev) => (prev ? { ...prev, avatarUrl: newUrl } : prev))
+            }
+          />
+          <ProfileInfoForm profile={profile} onUpdated={setProfile} />
+          <SecurityForm />
+        </>
+      )}
+    </div>
+  )
+}
