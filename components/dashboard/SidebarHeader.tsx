@@ -1,19 +1,18 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { X } from "lucide-react";
 
-import Logo from "@/components/common/Logo";
 import { cn } from "@/lib/utils";
 
 type SidebarHeaderProps = {
     collapsed: boolean;
     setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+    onClose?: () => void;
 };
 
-export default function SidebarHeader({
-    collapsed,
-    setCollapsed,
-}: SidebarHeaderProps) {
+export default function SidebarHeader({ collapsed, setCollapsed, onClose }: SidebarHeaderProps) {
     return (
         <div
             className={cn(
@@ -21,37 +20,53 @@ export default function SidebarHeader({
                 collapsed ? "justify-center" : "justify-between"
             )}
         >
-            <Logo collapsed={collapsed} />
+            {/* Logo — always visible; clicking goes to homepage */}
+            <Link href="/" className="flex items-center gap-2.5 shrink-0" title="Go to homepage">
+                <Image
+                    src="/icons/Icon.png"
+                    alt="Pathshala"
+                    width={34}
+                    height={34}
+                    priority
+                />
+                {!collapsed && (
+                    <span className="text-[20px] font-[800] tracking-[-0.5px] text-white font-sans">
+                        Pathshala
+                    </span>
+                )}
+            </Link>
 
+            {/* Expanded: show collapse button OR mobile X close button */}
             {!collapsed && (
-                <button
-                    onClick={() => setCollapsed((prev) => !prev)}
-                    className="rounded-lg p-2 transition hover:bg-white/5"
-                >
-                    <Image
-                        src="/icons/collapse.svg"
-                        alt=""
-                        width={18}
-                        height={18}
-                        className="brightness-0 invert"
-                    />
-                </button>
-            )}
-
-            {collapsed && (
-                <button
-                    onClick={() => setCollapsed(false)}
-                    className="absolute top-6 left-[28px] rounded-lg p-2 transition hover:bg-white/5"
-                >
-                    <Image
-                        src="/icons/collapse.svg"
-                        alt="Expand sidebar"
-                        width={18}
-                        height={18}
-                        className="rotate-180 transition-transform duration-300"
-
-                    />
-                </button>
+                <div className="flex items-center gap-1">
+                    {/* Mobile close (X) — only in drawer mode */}
+                    {onClose ? (
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            title="Close sidebar"
+                            className="flex items-center justify-center w-9 h-9 rounded-lg transition hover:bg-white/5 cursor-pointer"
+                        >
+                            <X size={18} className="text-white/70" />
+                        </button>
+                    ) : (
+                        /* Desktop collapse button */
+                        <button
+                            type="button"
+                            onClick={() => setCollapsed(true)}
+                            title="Collapse sidebar"
+                            className="flex items-center justify-center w-9 h-9 rounded-lg transition hover:bg-white/5 cursor-pointer"
+                        >
+                            <Image
+                                src="/icons/collapse.svg"
+                                alt="Collapse sidebar"
+                                width={18}
+                                height={18}
+                                className="brightness-0 invert"
+                            />
+                        </button>
+                    )}
+                </div>
             )}
         </div>
     );

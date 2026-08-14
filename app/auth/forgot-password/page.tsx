@@ -4,7 +4,7 @@ import { useState, type ChangeEvent, type FormEvent } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { DM_Sans, Fredoka } from "next/font/google"
-import { Eye, EyeOff, ArrowLeft } from "lucide-react"
+import { Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react"
 
 import { forgotPassword, verifyOtp, resetPassword } from "@/lib/api"
 import { forgotPasswordSchema, verifyOtpSchema, resetPasswordSchema } from "@/lib/validation"
@@ -258,10 +258,17 @@ export default function ForgotPasswordPage() {
                   disabled={isSubmitting}
                   className={cn(
                     dmSans.className,
-                    "w-full h-[44.8px] rounded-[12px] bg-[#14B8A6] text-[#060910] hover:bg-[#14B8A6]/90 font-[900] text-[15px] uppercase tracking-wider shadow-[0_0_22px_rgba(20,184,166,0.25)] border-none transition-all duration-200 cursor-pointer disabled:opacity-50"
+                    "w-full h-[44.8px] rounded-[12px] bg-[#14B8A6] text-[#060910] hover:bg-[#14B8A6]/90 font-[900] text-[15px] uppercase tracking-wider shadow-[0_0_22px_rgba(20,184,166,0.25)] border-none transition-all duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                   )}
                 >
-                  {isSubmitting ? "Sending OTP..." : "Send OTP"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Sending OTP...</span>
+                    </>
+                  ) : (
+                    "Send OTP"
+                  )}
                 </Button>
 
                 <p className="text-[14px] font-[300] text-white text-center mt-[4px]">
@@ -321,10 +328,17 @@ export default function ForgotPasswordPage() {
                   disabled={isSubmitting}
                   className={cn(
                     dmSans.className,
-                    "w-full h-[44.8px] rounded-[12px] bg-[#14B8A6] text-[#060910] hover:bg-[#14B8A6]/90 font-[900] text-[15px] uppercase tracking-wider shadow-[0_0_22px_rgba(20,184,166,0.25)] border-none transition-all duration-200 cursor-pointer disabled:opacity-50"
+                    "w-full h-[44.8px] rounded-[12px] bg-[#14B8A6] text-[#060910] hover:bg-[#14B8A6]/90 font-[900] text-[15px] uppercase tracking-wider shadow-[0_0_22px_rgba(20,184,166,0.25)] border-none transition-all duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                   )}
                 >
-                  {isSubmitting ? "Verifying..." : "Verify OTP"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Verifying...</span>
+                    </>
+                  ) : (
+                    "Verify OTP"
+                  )}
                 </Button>
 
                 <p className="text-[14px] font-[300] text-[#F8FAFC]/55 text-center mt-[4px]">
@@ -333,9 +347,16 @@ export default function ForgotPasswordPage() {
                     type="button"
                     disabled={isSubmitting}
                     onClick={handleResendOtp}
-                    className="text-[#14B8A6] font-[600] hover:underline transition-all bg-transparent border-none cursor-pointer disabled:opacity-50"
+                    className="text-[#14B8A6] font-[600] hover:underline transition-all bg-transparent border-none cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
                   >
-                    {isSubmitting ? "Resending..." : "Resend OTP"}
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <span>Resending...</span>
+                      </>
+                    ) : (
+                      "Resend OTP"
+                    )}
                   </button>
                 </p>
 
@@ -450,10 +471,17 @@ export default function ForgotPasswordPage() {
                   disabled={isSubmitting}
                   className={cn(
                     dmSans.className,
-                    "w-full h-[44.8px] rounded-[12px] bg-[#14B8A6] text-[#060910] hover:bg-[#14B8A6]/90 font-[900] text-[15px] uppercase tracking-wider shadow-[0_0_22px_rgba(20,184,166,0.25)] border-none transition-all duration-200 cursor-pointer disabled:opacity-50"
+                    "w-full h-[44.8px] rounded-[12px] bg-[#14B8A6] text-[#060910] hover:bg-[#14B8A6]/90 font-[900] text-[15px] uppercase tracking-wider shadow-[0_0_22px_rgba(20,184,166,0.25)] border-none transition-all duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                   )}
                 >
-                  {isSubmitting ? "Resetting Password..." : "Reset Password"}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Resetting Password...</span>
+                    </>
+                  ) : (
+                    "Reset Password"
+                  )}
                 </Button>
               </div>
             </form>

@@ -4,7 +4,7 @@ import { useState, type ChangeEvent, type ComponentProps, type FormEvent } from 
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { DM_Sans, Fredoka } from "next/font/google"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { loginUser } from "@/lib/api"
@@ -234,10 +234,17 @@ export default function LoginForm({
                 disabled={isSubmitting}
                 className={cn(
                   dmSans.className,
-                  "w-full h-[44.8px] rounded-[12px] bg-[#14B8A6] text-[#060910] hover:bg-[#14B8A6]/90 font-[900] text-[15px] uppercase tracking-wider shadow-[0_0_22px_rgba(20,184,166,0.25)] border-none transition-all duration-200 cursor-pointer disabled:opacity-50"
+                  "w-full h-[44.8px] rounded-[12px] bg-[#14B8A6] text-[#060910] hover:bg-[#14B8A6]/90 font-[900] text-[15px] uppercase tracking-wider shadow-[0_0_22px_rgba(20,184,166,0.25)] border-none transition-all duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                 )}
               >
-                {isSubmitting ? "Logging in..." : "Log In"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Logging in...</span>
+                  </>
+                ) : (
+                  "Log In"
+                )}
               </Button>
 
               {/* OR Divider */}

@@ -58,7 +58,11 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError);
-        if (typeof window !== "undefined" && !window.location.pathname.startsWith("/auth")) {
+        const protectedRoutes = ["/student", "/teacher", "/profile", "/dashboard"];
+        const isCurrentRouteProtected = typeof window !== "undefined" && 
+          protectedRoutes.some((route) => window.location.pathname.startsWith(route));
+
+        if (isCurrentRouteProtected) {
           window.location.href = "/auth/login";
         }
         return Promise.reject(refreshError);
