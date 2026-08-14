@@ -5,21 +5,24 @@ import { useCallback, useEffect, useState } from "react";
 import {
     getEducationLevels,
     getInstitutes,
-    getProfile,
     Institute,
 } from "@/lib/api";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 export function useInstitutes() {
     const [institutes, setInstitutes] = useState<Institute[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { profile, isLoading: isProfileLoading, error: profileError } = useAuthSession();
 
     const fetchInstitutes = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
 
-            const profile = await getProfile();
+            if (!profile) {
+                throw new Error("Failed to load session.");
+            }
 
             const educationLevels = await getEducationLevels();
 
@@ -50,15 +53,24 @@ export function useInstitutes() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [profile]);
 
     useEffect(() => {
-        fetchInstitutes();
-    }, [fetchInstitutes]);
+        if (profile) {
+            fetchInstitutes();
+        }
+    }, [fetchInstitutes, profile]);
+
+    useEffect(() => {
+        if (profileError) {
+            setError(profileError.message);
+            setLoading(false);
+        }
+    }, [profileError]);
 
     return {
         institutes,
-        loading,
+        loading: loading || isProfileLoading,
         error,
         refetch: fetchInstitutes,
     };

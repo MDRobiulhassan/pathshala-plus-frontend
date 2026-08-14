@@ -7,6 +7,7 @@ import useExamQuestions from "@/hooks/question-bank/useExamQuestions";
 import TestHeader from "./TestHeader";
 import TestFooter from "./TestFooter";
 import TestQuestionCard from "./TestQuestionCard";
+import TestResult from "./TestResult";
 
 import { useState } from "react";
 import BackButton from "@/components/ui/BackButton";
@@ -27,6 +28,8 @@ export default function TestPage() {
 
     const [answers, setAnswers] =
         useState<Record<number, number>>({});
+
+    const [submitted, setSubmitted] = useState(false);
 
     function handleSelect(
         questionId: number,
@@ -65,6 +68,20 @@ export default function TestPage() {
                 )
             )
         );
+
+    if (submitted) {
+        return (
+            <TestResult
+                questions={questions}
+                answers={answers}
+                duration={data.examInfo.durationInMinutes}
+                onRetry={() => {
+                    setAnswers({});
+                    setSubmitted(false);
+                }}
+            />
+        );
+    }
 
     return (
         <div className="mx-auto max-w-5xl space-y-10">
@@ -115,9 +132,7 @@ export default function TestPage() {
                         .length
                 }
                 total={questions.length}
-                onSubmit={() =>
-                    console.log(answers)
-                }
+                onSubmit={() => setSubmitted(true)}
             />
         </div>
     );

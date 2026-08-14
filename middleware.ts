@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { AUTH_COOKIE_NAME } from "@/lib/auth-constants";
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("access_token")?.value;
+  const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
 
   // Protected routes
   const protectedRoutes = [
@@ -9,7 +10,6 @@ export function middleware(request: NextRequest) {
     "/profile",
     "/student",
     "/teacher",
-    "/admin",
   ];
 
   const isProtected = protectedRoutes.some((route) =>

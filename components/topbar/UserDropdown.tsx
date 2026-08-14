@@ -4,39 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronDown, LogOut, Settings, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
-import { getProfile } from "@/lib/api";
-
-type Profile = {
-    id: number;
-    name: string;
-    email: string;
-    avatarUrl: string | null;
-    preferredLanguage: string;
-    educationLevel: string;
-    roles: string[];
-};
+import { logoutUser } from "@/lib/api";
+import { AUTH_SESSION_QUERY_KEY, useAuthSession } from "@/hooks/useAuthSession";
 
 export default function UserDropdown() {
     const router = useRouter();
+    const queryClient = useQueryClient();
+    const { profile, isLoading } = useAuthSession();
 
-    const [profile, setProfile] = useState<Profile | null>(null);
     const [open, setOpen] = useState(false);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        async function loadProfile() {
-            try {
-                const data = await getProfile();
-                setProfile(data);
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        loadProfile();
-    }, []);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -57,13 +37,19 @@ export default function UserDropdown() {
             );
     }, []);
 
-    function logout() {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("role");
-        localStorage.removeItem("userId");
+    async function logout() {
+        try {
+            await logoutUser();
+        } catch (err) {
+            console.error(err);
+        } finally {
+            queryClient.removeQueries({ queryKey: AUTH_SESSION_QUERY_KEY });
+            router.push("/auth/login");
+        }
+    }
 
-        router.push("/auth/login");
+    if (isLoading) {
+        return null;
     }
 
     return (

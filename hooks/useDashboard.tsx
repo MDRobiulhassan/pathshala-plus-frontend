@@ -1,47 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getStudentDashboard } from "@/lib/api";
-
-export type DashboardResponse = {
-    continueLearning: any;
-    learningProgress: {
-        totalTestsTaken: number;
-        averageScore: number;
-        highestScore: number;
-        questionsSolved: number;
-        accuracyPercentage: number;
-        studyStreak: number;
-    };
-    recentTests: any[];
-};
+import { useQuery } from "@tanstack/react-query";
+import { getStudentDashboard, type DashboardResponse } from "@/lib/api";
 
 export function useDashboard() {
-    const [dashboard, setDashboard] =
-        useState<DashboardResponse | null>(null);
-
-    const [loading, setLoading] =
-        useState(true);
-
-    useEffect(() => {
-        async function loadDashboard() {
-            try {
-                const data =
-                    await getStudentDashboard();
-
-                setDashboard(data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        loadDashboard();
-    }, []);
+    const { data, isLoading, error } = useQuery<DashboardResponse, Error>({
+        queryKey: ["student-dashboard"],
+        queryFn: getStudentDashboard,
+        retry: 1,
+    });
 
     return {
-        dashboard,
-        loading,
+        dashboard: data ?? null,
+        loading: isLoading,
+        error,
     };
 }

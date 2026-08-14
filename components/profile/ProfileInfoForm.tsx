@@ -23,6 +23,8 @@ import {
   Language,
   UserProfileResponse,
 } from "@/lib/api"
+import { toast } from "sonner"
+import { profileInfoSchema } from "@/lib/validation"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -108,29 +110,31 @@ const roleLabel = profile.roles?.[0]
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!name || name.trim().length < 2) {
-      alert("Name must be at least 2 characters")
+    const parsed = profileInfoSchema.safeParse({ name, phone })
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? "Please check your form"
+      toast.error(message)
       return
     }
 
     if (selectedEducationLevel && departmentOptions.length > 0 && !selectedDepartmentId) {
-      alert("Please select a group/department")
+      toast.error("Please select a group/department")
       return
     }
 
     try {
       setIsSubmitting(true)
       const updated = await updateProfile({
-        name,
-        phone: phone || undefined,
+        name: parsed.data.name,
+        phone: parsed.data.phone || undefined,
         preferredLanguageCode: preferredLanguageCode || undefined,
         educationLevelId: selectedDepartmentId ? Number(selectedDepartmentId) : undefined,
       })
       onUpdated(updated)
-      alert("Profile updated successfully")
+      toast.success("Profile updated successfully")
     } catch (error) {
       console.error(error)
-      alert(error instanceof Error ? error.message : "Failed to update profile")
+      toast.error(error instanceof Error ? error.message : "Failed to update profile")
     } finally {
       setIsSubmitting(false)
     }
@@ -339,7 +343,7 @@ const roleLabel = profile.roles?.[0]
             <path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.6C29.6 34.9 26.9 36 24 36c-5.3 0-9.7-3.1-11.3-7.9l-6.6 5.1C9.9 39.7 16.4 44 24 44z"/>
             <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.6l6.6 5.6C41.4 36 44 30.6 44 24c0-1.3-.1-2.7-.4-3.5z"/>
           </svg>
-          {profile.providers?.includes("GOOGLE") ? "Google Connected" : "Connect Google"}
+          {(profile.providers ?? []).includes("GOOGLE") ? "Google Connected" : "Connect Google"}
         </button>
 
         <button

@@ -7,6 +7,7 @@ import { DM_Sans, Fredoka } from "next/font/google"
 import { Eye, EyeOff, ArrowLeft } from "lucide-react"
 
 import { forgotPassword, verifyOtp, resetPassword } from "@/lib/api"
+import { forgotPasswordSchema, verifyOtpSchema, resetPasswordSchema } from "@/lib/validation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,9 +25,6 @@ const fredoka = Fredoka({
   weight: ["400"],
   variable: "--font-fredoka",
 })
-
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$/
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export default function ForgotPasswordPage() {
   const router = useRouter()
@@ -46,13 +44,10 @@ export default function ForgotPasswordPage() {
 
   async function handleSendOtp(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!email) {
-      setErrorMsg("Email is required")
-      return
-    }
-
-    if (!EMAIL_REGEX.test(email)) {
-      setErrorMsg("Please enter a valid email address.")
+    
+    const parsed = forgotPasswordSchema.safeParse({ email })
+    if (!parsed.success) {
+      setErrorMsg(parsed.error.issues[0]?.message ?? "Please check your email.")
       return
     }
 
@@ -61,13 +56,12 @@ export default function ForgotPasswordPage() {
       setErrorMsg("")
       setMessage("")
       
-      await forgotPassword(email)
+      await forgotPassword(parsed.data.email)
       
       setErrorMsg("")
       setMessage("")
       setStep(2)
     } catch (error: any) {
-      console.error(error)
       setErrorMsg(error.message || "Failed to send OTP")
     } finally {
       setIsSubmitting(false)
@@ -84,7 +78,6 @@ export default function ForgotPasswordPage() {
       
       setMessage("OTP has been sent again.")
     } catch (error: any) {
-      console.error(error)
       setErrorMsg(error.message || "Failed to resend OTP")
     } finally {
       setIsSubmitting(false)
@@ -93,14 +86,10 @@ export default function ForgotPasswordPage() {
 
   async function handleVerifyOtp(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!otp) {
-      setErrorMsg("OTP is required")
-      return
-    }
-
-    const OTP_REGEX = /^\d{6}$/
-    if (!OTP_REGEX.test(otp)) {
-      setErrorMsg("OTP must contain exactly 6 digits.")
+    
+    const parsed = verifyOtpSchema.safeParse({ email, otp })
+    if (!parsed.success) {
+      setErrorMsg(parsed.error.issues[0]?.message ?? "Please check your OTP.")
       return
     }
 
@@ -108,14 +97,13 @@ export default function ForgotPasswordPage() {
       setIsSubmitting(true)
       setErrorMsg("")
       
-      const response = await verifyOtp(email, otp)
+      const response = await verifyOtp(parsed.data.email, parsed.data.otp)
       
       setResetToken(response.resetToken)
       setErrorMsg("")
       setMessage("")
       setStep(3)
     } catch (error: any) {
-      console.error(error)
       setErrorMsg(error.message || "Verification failed")
     } finally {
       setIsSubmitting(false)
@@ -125,20 +113,9 @@ export default function ForgotPasswordPage() {
   async function handleResetPassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     
-    if (!newPassword || !confirmPassword) {
-      setErrorMsg("Please fill in both password fields")
-      return
-    }
-
-    if (!PASSWORD_REGEX.test(newPassword)) {
-      const errorText = "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character."
-      setErrorMsg(errorText)
-      return
-    }
-
-    if (newPassword !== confirmPassword) {
-      const errorText = "Passwords do not match"
-      setErrorMsg(errorText)
+    const parsed = resetPasswordSchema.safeParse({ resetToken, newPassword, confirmPassword })
+    if (!parsed.success) {
+      setErrorMsg(parsed.error.issues[0]?.message ?? "Please check your passwords.")
       return
     }
 
@@ -147,7 +124,7 @@ export default function ForgotPasswordPage() {
       setErrorMsg("")
       setMessage("")
 
-      await resetPassword(resetToken, newPassword, confirmPassword)
+      await resetPassword(parsed.data.resetToken, parsed.data.newPassword, parsed.data.confirmPassword)
 
       setMessage("Password reset successfully. Redirecting to login...")
       
@@ -160,7 +137,6 @@ export default function ForgotPasswordPage() {
         router.push("/auth/login")
       }, 1500)
     } catch (error: any) {
-      console.error(error)
       setErrorMsg(error.message || "Password reset failed")
     } finally {
       setIsSubmitting(false)

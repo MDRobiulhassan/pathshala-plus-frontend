@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { DM_Sans, Fredoka } from "next/font/google"
 import { Eye, EyeOff } from "lucide-react"
+import { toast } from "sonner"
 
 import { loginUser } from "@/lib/api"
 import { cn } from "@/lib/utils"
@@ -13,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { googleAuth } from "@/lib/api"
+import { loginSchema } from "@/lib/validation"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -51,18 +53,16 @@ export default function LoginForm({
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!values.email || !values.password) {
-      alert("Email and password are required")
+    const parsed = loginSchema.safeParse(values)
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? "Please check your credentials"
+      toast.error(message)
       return
     }
 
     try {
       setIsSubmitting(true)
-      const data = await loginUser(values)
-
-
-      localStorage.setItem("id", data.id.toString())
-      localStorage.setItem("role", data.role)
+      const data = await loginUser(parsed.data)
 
       if (data.role === "TEACHER") {
         router.push("/teacher")
@@ -72,12 +72,10 @@ export default function LoginForm({
         router.push("/")
       }
     } catch (error) {
-      console.error(error)
-
       if (error instanceof Error) {
-        alert(error.message)
+        toast.error(error.message)
       } else {
-        alert("Login failed")
+        toast.error("Login failed")
       }
     } finally {
       setIsSubmitting(false)

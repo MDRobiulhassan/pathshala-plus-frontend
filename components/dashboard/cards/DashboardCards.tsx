@@ -1,7 +1,7 @@
 "use client";
 
 import DashboardCard from "./DashboardCard";
-import { DashboardResponse } from "@/hooks/useDashboard";
+import type { DashboardResponse } from "@/lib/api";
 
 type Props = {
     dashboard: DashboardResponse;

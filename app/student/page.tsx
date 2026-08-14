@@ -11,7 +11,7 @@ import { useDashboard } from "@/hooks/useDashboard";
 import Loader from "@/components/ui/Loader";
 
 export default function StudentPage() {
-  const { dashboard, loading } = useDashboard();
+  const { dashboard, loading, error } = useDashboard();
 
   if (loading) {
     return (
@@ -21,10 +21,10 @@ export default function StudentPage() {
     );
   }
 
-  if (!dashboard) {
+  if (error || !dashboard) {
     return (
       <div className="flex justify-center py-20 text-red-400">
-        Failed to load dashboard.
+        {error?.message ?? "Failed to load dashboard."}
       </div>
     );
   }

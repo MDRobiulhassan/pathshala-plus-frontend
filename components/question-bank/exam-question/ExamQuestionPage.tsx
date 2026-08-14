@@ -41,7 +41,7 @@ export default function ExamQuestionPage() {
         );
     }
 
-    console.log("Exam Question Response:", data);
+
 
     let questionNumber = 1;
 
