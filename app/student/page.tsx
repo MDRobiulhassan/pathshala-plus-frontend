@@ -8,12 +8,14 @@ import AccuracyCard from "@/components/dashboard/sections/AccuracyCard";
 import RecentTestsCard from "@/components/dashboard/sections/RecentTestsCard";
 
 import { useDashboard } from "@/hooks/useDashboard";
+import { useUserTestAttempts } from "@/hooks/useUserTestAttempts";
 import Loader from "@/components/ui/Loader";
 
 export default function StudentPage() {
-  const { dashboard, loading, error } = useDashboard();
+  const { dashboard, loading: dashboardLoading, error: dashboardError } = useDashboard();
+  const { attempts: userAttempts, loading: attemptsLoading } = useUserTestAttempts();
 
-  if (loading) {
+  if (dashboardLoading || attemptsLoading) {
     return (
       <div className="flex min-h-[300px] items-center justify-center">
         <Loader />
@@ -21,13 +23,19 @@ export default function StudentPage() {
     );
   }
 
-  if (error || !dashboard) {
+  if (dashboardError || !dashboard) {
     return (
       <div className="flex justify-center py-20 text-red-400">
-        {error?.message ?? "Failed to load dashboard."}
+        {dashboardError?.message ?? "Failed to load dashboard."}
       </div>
     );
   }
+
+  // Combine user attempts and recent tests to detect both Timed Test and Practice sessions
+  const activeTestsList = [
+    ...(userAttempts || []),
+    ...(dashboard.recentTests || []),
+  ];
 
   return (
     <div className="space-y-6">
@@ -36,6 +44,7 @@ export default function StudentPage() {
       <div className="grid gap-6 xl:grid-cols-2">
         <ContinueLearningCard
           continueLearning={dashboard.continueLearning}
+          activeTests={activeTestsList}
         />
 
         <LearningProgressCard

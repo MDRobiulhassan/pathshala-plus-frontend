@@ -1,23 +1,33 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
-import useExamQuestions from "@/hooks/question-bank/useExamQuestions";
-
+import useTestAttempt from "@/hooks/question-bank/useTestAttempt";
 import PracticeQuestionCard from "./PracticeQuestionCard";
+import TestResult from "../test/TestResult";
+import TestHeader from "../test/TestHeader";
 import BackButton from "@/components/ui/BackButton";
 import Loader from "@/components/ui/Loader";
 
 export default function PracticePage() {
-    const params = useParams();
-
-    const examInfoId = Number(params.examInfoId);
+    const searchParams = useSearchParams();
+    const testId = Number(searchParams.get("testId") ?? 0);
+    const [reviewMode, setReviewMode] = useState(false);
 
     const {
-        data,
+        attemptDetails,
+        answers,
+        result,
         loading,
+        submitting,
+        retaking,
         error,
-    } = useExamQuestions(examInfoId);
+        selectOption,
+        submit,
+        retake,
+    } = useTestAttempt(testId);
 
     if (loading) {
         return (
@@ -29,76 +39,203 @@ export default function PracticePage() {
 
     if (error) {
         return (
-            <div className="text-red-500">
-                {error}
+            <div className="mx-auto max-w-md space-y-6 py-16 text-center">
+                <BackButton />
+                <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6 space-y-4">
+                    <p className="text-red-400 font-medium">{error}</p>
+                    <button
+                        onClick={() => retake()}
+                        className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
+                    >
+                        Try Again
+                    </button>
+                </div>
             </div>
         );
     }
 
-    if (!data) {
+    // After submitting show the TestResult card (with See Answer & Try Again)
+    if (result && !reviewMode) {
+        return (
+            <TestResult
+                result={result}
+                onViewAnswers={() => setReviewMode(true)}
+                onRetake={retake}
+                retaking={retaking}
+            />
+        );
+    }
+
+    if (!attemptDetails) {
         return null;
     }
 
     let questionNumber = 1;
+    const testInfo = attemptDetails.testInfo;
+    const totalQuestions = testInfo?.totalQuestions ?? 0;
+
+    const duration = testInfo?.durationInMinutes || 60;
+    const totalMarks = testInfo?.totalMarks || 100;
+    const negativeMark = testInfo?.negativeMarksPerQuestion || 25;
+
+    // Use result subjects for review mode so we get correctOption etc.
+    const displaySubjects = reviewMode && result
+        ? result.subjects as any[]
+        : attemptDetails.subjects;
 
     return (
-        <div className="mx-auto max-w-5xl space-y-8">
-
-            <BackButton />
-
-            <div className="flex items-center justify-between">
-
-                <h1 className="text-3xl font-bold">
-                    Practice Mode
-                </h1>
-
-                <div className="text-muted-foreground">
-                    {data.subjects.reduce(
-                        (count, subject) =>
-                            count +
-                            subject.chapters.reduce(
-                                (chapterCount, chapter) =>
-                                    chapterCount +
-                                    chapter.passages.reduce(
-                                        (passageCount, passage) =>
-                                            passageCount +
-                                            passage.questions.length,
-                                        0
-                                    ),
-                                0
-                            ),
-                        0
-                    )}{" "}
-                    Questions
+        <div className="mx-auto max-w-5xl space-y-6">
+            {reviewMode ? (
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => setReviewMode(false)}
+                        className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium hover:bg-white/10 transition-colors cursor-pointer"
+                    >
+                        ← Back to Test Result
+                    </button>
+                    <span className="text-xl font-bold">Answer Review</span>
                 </div>
+            ) : (
+                <TestHeader
+                    title={testInfo?.testName || testInfo?.examType}
+                    testInfo={testInfo}
+                    subjects={displaySubjects}
+                    duration={duration}
+                    totalMarks={totalMarks}
+                    negativeMark={negativeMark}
+                />
+            )}
 
-            </div>
+            {displaySubjects?.map((subject: any) => {
+                const subjectQuestionCount = subject.chapters?.reduce(
+                    (cAcc: number, ch: any) =>
+                        cAcc + ch.passages?.reduce((pAcc: number, p: any) => pAcc + (p.questions?.length || 0), 0),
+                    0
+                ) || 0;
 
-            {data.subjects.map((subject) => (
-                <div
-                    key={subject.subjectId}
-                    className="space-y-6"
-                >
+                return (
+                    <div key={subject.subjectId} className="space-y-8 pt-2">
+                        {/* Subject header matching question bank style */}
+                        <div className="text-center border-b border-white/10 pb-4">
+                            <h2 className="text-3xl font-bold text-white tracking-tight">
+                                {subject.subjectName} ({subjectQuestionCount})
+                            </h2>
+                        </div>
 
-                    <h2 className="text-2xl font-semibold">
-                        {subject.subjectName}
-                    </h2>
+                        {subject.chapters?.map((chapter: any) => (
+                            <div
+                                key={chapter.chapterId ?? `chapter-${chapter.chapterName ?? "default"}`}
+                                className="space-y-6"
+                            >
+                                {chapter.chapterName && (
+                                    <h3 className="text-xl font-semibold text-white/90">
+                                        {chapter.chapterName}
+                                    </h3>
+                                )}
 
-                    {subject.chapters.map((chapter) =>
-                        chapter.passages.map((passage) =>
-                            passage.questions.map((question) => (
-                                <PracticeQuestionCard
-                                    key={question.questionId}
-                                    question={question}
-                                    questionNumber={questionNumber++}
-                                />
-                            ))
-                        )
-                    )}
+                                {chapter.passages?.map((passage: any, passageIdx: number) => {
+                                    const pStart = questionNumber;
+                                    const pEnd = questionNumber + (passage.questions?.length || 1) - 1;
+                                    const rangeLabel =
+                                        pStart === pEnd
+                                            ? `question ${pStart}`
+                                            : `questions ${pStart}–${pEnd}`;
 
+                                    return (
+                                        <div
+                                            key={passage.passageId ?? `passage-${passageIdx}`}
+                                            className="space-y-6"
+                                        >
+                                            {passage.passageText && (
+                                                <div className="rounded-2xl border border-white/10 bg-[#0C1120] p-6 space-y-3">
+                                                    <div className="text-xs font-bold text-[#14B8A6] uppercase tracking-wider">
+                                                        Read the passage and answer {rangeLabel}
+                                                    </div>
+                                                    <p className="text-xl leading-relaxed text-white/90 font-sans">
+                                                        {passage.passageText}
+                                                    </p>
+                                                    {passage.passageImageUrl && (
+                                                        <img
+                                                            src={passage.passageImageUrl}
+                                                            alt="Passage illustration"
+                                                            className="rounded-lg max-h-60 object-contain"
+                                                        />
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {passage.questions?.map((question: any) => (
+                                                <PracticeQuestionCard
+                                                    key={question.questionId}
+                                                    question={question}
+                                                    questionNumber={questionNumber++}
+                                                    onSelect={reviewMode ? undefined : selectOption}
+                                                />
+                                            ))}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ))}
+                    </div>
+                );
+            })}
+
+            {/* Sticky footer matching timed test style */}
+            {!reviewMode && (
+                <div className="sticky bottom-3 z-30 mx-auto max-w-5xl rounded-2xl border border-white/10 bg-[#0C1120] p-3 sm:p-4 shadow-2xl">
+                    {/* Desktop View */}
+                    <div className="hidden sm:grid sm:grid-cols-3 sm:items-center">
+                        <div className="flex justify-start text-sm font-semibold text-white/90">
+                            Practice Mode
+                        </div>
+
+                        <div className="flex justify-center">
+                            <button
+                                onClick={submit}
+                                disabled={submitting}
+                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-8 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-md whitespace-nowrap"
+                            >
+                                {submitting ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <span>Submitting…</span>
+                                    </>
+                                ) : (
+                                    <span>Finish & See Results</span>
+                                )}
+                            </button>
+                        </div>
+
+                        <div className="flex justify-end text-sm font-medium text-white/80">
+                            <span>{Object.keys(answers ?? {}).length} / {totalQuestions} Questions</span>
+                        </div>
+                    </div>
+
+                    {/* Mobile View */}
+                    <div className="flex flex-col gap-2 sm:hidden">
+                        <div className="flex items-center justify-between text-xs font-medium text-white/80 px-1">
+                            <span className="font-semibold text-white">Practice Mode</span>
+                            <span>{Object.keys(answers ?? {}).length} / {totalQuestions} Questions</span>
+                        </div>
+
+                        <button
+                            onClick={submit}
+                            disabled={submitting}
+                            className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-md"
+                        >
+                            {submitting ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <span>Submitting…</span>
+                                </>
+                            ) : (
+                                <span>Finish & See Results</span>
+                            )}
+                        </button>
+                    </div>
                 </div>
-            ))}
-
+            )}
         </div>
     );
 }

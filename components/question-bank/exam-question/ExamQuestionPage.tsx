@@ -3,14 +3,12 @@
 import { useParams } from "next/navigation";
 import useExamQuestions from "@/hooks/question-bank/useExamQuestions";
 import SubjectQuestionCard from "../subject/SubjectQuestionCard";
+import TestHeader from "../test/TestHeader";
 import BackButton from "@/components/ui/BackButton";
 import Loader from "@/components/ui/Loader";
 
-import { BookOpen } from "lucide-react";
-
 export default function ExamQuestionPage() {
     const params = useParams();
-
     const examInfoId = Number(params.examInfoId);
 
     const {
@@ -54,18 +52,36 @@ export default function ExamQuestionPage() {
 
     let globalQuestionNum = 1;
 
-    return (
-        <div className="space-y-10">
-            <BackButton fallbackHref="/student/question-bank" />
+    const duration =
+        data.examInfo?.durationInMinutes ||
+        (data as any).durationInMinutes ||
+        60;
 
-            {data.subjects.map((subject) => {
+    const totalMarks =
+        data.examInfo?.totalMarks ||
+        (data as any).totalMarks ||
+        100;
+
+    return (
+        <div className="space-y-6">
+            <TestHeader
+                title={data.examInfo?.examType}
+                testInfo={data.examInfo}
+                subjects={data.subjects}
+                duration={duration}
+                totalMarks={totalMarks}
+                negativeMark={25}
+                backHref="/student/question-bank"
+            />
+
+            {data.subjects?.map((subject) => {
                 const subjectQuestionCount = subject.chapters.reduce(
                     (cAcc, ch) => cAcc + ch.passages.reduce((pAcc, p) => pAcc + p.questions.length, 0),
                     0
                 );
 
                 return (
-                    <div key={subject.subjectId} className="space-y-8">
+                    <div key={subject.subjectId} className="space-y-8 pt-2">
                         <div className="text-center border-b border-white/10 pb-4">
                             <h2 className="text-3xl font-bold text-white tracking-tight">
                                 {subject.subjectName} ({subjectQuestionCount})
@@ -95,11 +111,10 @@ export default function ExamQuestionPage() {
                                         >
                                             {passage.passageText && (
                                                 <div className="rounded-2xl border border-white/10 bg-[#0C1120] p-6 space-y-3">
-                                                    <div className="flex items-center gap-2 text-xs font-bold text-[#14B8A6] uppercase tracking-wider">
-                                                        <BookOpen size={14} />
-                                                        <span>Read the passage and answer {rangeLabel}</span>
+                                                    <div className="text-xs font-bold text-[#14B8A6] uppercase tracking-wider">
+                                                        Read the passage and answer {rangeLabel}
                                                     </div>
-                                                    <p className="text-sm leading-relaxed text-white/90 font-sans">
+                                                    <p className="text-xl leading-relaxed text-white/90 font-sans">
                                                         {passage.passageText}
                                                     </p>
                                                     {passage.passageImageUrl && (

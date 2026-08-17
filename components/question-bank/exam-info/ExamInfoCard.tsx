@@ -1,6 +1,6 @@
 "use client";
 
-import { ExamInfo } from "@/lib/api";
+import { ExamInfo } from "@/lib/api/question-bank";
 import { useRouter } from "next/navigation";
 
 type Props = {
@@ -25,7 +25,6 @@ export default function ExamInfoCard({
         "
         >
             <div className="space-y-3 text-center">
-
                 <p>
                     <span className="font-semibold">
                         Duration:
@@ -46,11 +45,9 @@ export default function ExamInfoCard({
                     </span>{" "}
                     {examInfo.examType}
                 </p>
-
             </div>
 
             <div className="mt-8 flex flex-col gap-4">
-
                 <button
                     onClick={() =>
                         router.push(
@@ -65,7 +62,7 @@ export default function ExamInfoCard({
                 <button
                     onClick={() =>
                         router.push(
-                            `/student/question-bank/exam-info/${examInfo.id}/practice`
+                            `/student/question-bank/exam-info/${examInfo.id}/practice?testId=${examInfo.testId}`
                         )
                     }
                     className="rounded-xl border py-3 font-medium hover:bg-accent"
@@ -76,14 +73,13 @@ export default function ExamInfoCard({
                 <button
                     onClick={() =>
                         router.push(
-                            `/student/question-bank/exam-info/${examInfo.id}/test`
+                            `/student/question-bank/exam-info/${examInfo.id}/test?testId=${examInfo.testId}`
                         )
                     }
                     className="rounded-xl border py-3 font-medium hover:bg-primary hover:text-primary-foreground"
                 >
                     Take Test
                 </button>
-
             </div>
         </div>
     );

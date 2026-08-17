@@ -1,84 +1,135 @@
 "use client";
 
-import { Question, QuestionOption } from "@/lib/api";
+import { TestAttemptResult } from "@/lib/api/question-bank";
+import BackButton from "@/components/ui/BackButton";
+import { Loader2 } from "lucide-react";
 
 type Props = {
-    questions: Question[];
-    answers: Record<number, number>;
-    duration: number;
-    onRetry: () => void;
+    result?: TestAttemptResult | null;
+    onViewAnswers?: () => void;
+    onRetake?: () => void;
+    retaking?: boolean;
 };
 
-function getScore(questions: Question[], answers: Record<number, number>) {
-    let correct = 0;
-    let wrong = 0;
-    let unattempted = 0;
-
-    for (const question of questions) {
-        const selectedOptionId = answers[question.questionId];
-        if (selectedOptionId === undefined) {
-            unattempted++;
-        } else {
-            const correctOption = question.options.find(
-                (o: QuestionOption) => o.isCorrect
-            );
-            if (correctOption && correctOption.optionId === selectedOptionId) {
-                correct++;
-            } else {
-                wrong++;
-            }
-        }
-    }
-
-    return { correct, wrong, unattempted };
+function getTimeTaken(startedAt?: string | null, finishedAt?: string | null): string {
+    if (!startedAt || !finishedAt) return "N/A";
+    const start = new Date(startedAt).getTime();
+    const finish = new Date(finishedAt).getTime();
+    if (isNaN(start) || isNaN(finish)) return "N/A";
+    const diffMinutes = Math.round((finish - start) / (1000 * 60));
+    return `${Math.max(1, diffMinutes)} min`;
 }
 
-export default function TestResult({ questions, answers, duration, onRetry }: Props) {
-    const { correct, wrong, unattempted } = getScore(questions, answers);
-    const total = questions.length;
-    const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
-    const passed = percentage >= 40;
+export default function TestResult({
+    result,
+    onViewAnswers,
+    onRetake,
+    retaking = false,
+}: Props) {
+    if (!result) return null;
+
+    const { summary } = result;
+    const answeredCount = summary.correctAnswers + summary.incorrectAnswers;
+    const timeTaken = getTimeTaken(summary.startedAt, summary.finishedAt);
+    const passed = summary.passed;
+    const percentage = summary.totalMarks > 0
+        ? Math.round((summary.score / summary.totalMarks) * 100)
+        : 0;
 
     return (
-        <div className="mx-auto max-w-xl space-y-8 py-10">
-            <div className="rounded-3xl border bg-card p-8 text-center space-y-4">
-                <h1 className="text-3xl font-bold">Test Completed</h1>
+        <div className="mx-auto max-w-2xl space-y-8 py-6">
+            <BackButton />
 
-                <div
-                    className={`text-6xl font-extrabold ${
-                        passed ? "text-green-500" : "text-red-500"
-                    }`}
-                >
-                    {percentage}%
+            {/* Main Result Card */}
+            <div className="rounded-3xl border border-white/10 bg-[#0C1120] p-8 space-y-8 shadow-2xl">
+                {/* Header & Score Summary */}
+                <div className="text-center space-y-3">
+                    <h1 className="text-2xl font-bold text-white tracking-tight">
+                        {summary.testName || "Test Summary"}
+                    </h1>
+                    <p className="text-xs uppercase tracking-wider font-medium text-white/50">
+                        Test Result & Performance
+                    </p>
+
+                    <div className="py-4">
+                        <div className="text-5xl font-extrabold text-white tracking-tight">
+                            {summary.score} <span className="text-2xl text-white/40 font-semibold">/ {summary.totalMarks}</span>
+                        </div>
+                        <div className="mt-3 flex items-center justify-center gap-2">
+                            <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${
+                                passed
+                                    ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
+                                    : "bg-red-500/15 border border-red-500/30 text-red-400"
+                            }`}>
+                                {passed ? "Passed" : "Failed"} ({percentage}%)
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
-                <p className="text-muted-foreground">
-                    {passed ? "🎉 You passed!" : "😔 Better luck next time."}
-                </p>
-            </div>
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center space-y-1">
+                        <span className="text-xs font-medium text-white/60">Answered</span>
+                        <p className="text-xl font-bold text-white">{answeredCount}</p>
+                    </div>
 
-            <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="rounded-2xl border bg-card p-6">
-                    <p className="text-2xl font-bold text-green-500">{correct}</p>
-                    <p className="text-sm text-muted-foreground">Correct</p>
-                </div>
-                <div className="rounded-2xl border bg-card p-6">
-                    <p className="text-2xl font-bold text-red-500">{wrong}</p>
-                    <p className="text-sm text-muted-foreground">Wrong</p>
-                </div>
-                <div className="rounded-2xl border bg-card p-6">
-                    <p className="text-2xl font-bold text-yellow-500">{unattempted}</p>
-                    <p className="text-sm text-muted-foreground">Skipped</p>
-                </div>
-            </div>
+                    <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-center space-y-1">
+                        <span className="text-xs font-medium text-emerald-400">Correct</span>
+                        <p className="text-xl font-bold text-emerald-400">{summary.correctAnswers}</p>
+                    </div>
 
-            <div className="flex flex-col gap-3">
-                <button
-                    onClick={onRetry}
-                    className="rounded-xl border py-3 font-medium hover:bg-accent transition-colors"
-                >
-                    Try Again
-                </button>
+                    <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-center space-y-1">
+                        <span className="text-xs font-medium text-red-400">Incorrect</span>
+                        <p className="text-xl font-bold text-red-400">{summary.incorrectAnswers}</p>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center space-y-1">
+                        <span className="text-xs font-medium text-white/60">Unanswered</span>
+                        <p className="text-xl font-bold text-white/80">{summary.unansweredQuestions}</p>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center space-y-1">
+                        <span className="text-xs font-medium text-white/60">Time Taken</span>
+                        <p className="text-xl font-bold text-white">{timeTaken}</p>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center space-y-1">
+                        <span className="text-xs font-medium text-white/60">Status</span>
+                        <p className={`text-xl font-bold ${passed ? "text-emerald-400" : "text-red-400"}`}>
+                            {passed ? "Pass" : "Fail"}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Actions */}
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    {onViewAnswers && (
+                        <button
+                            onClick={onViewAnswers}
+                            className="w-full sm:w-auto min-w-[160px] rounded-xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors cursor-pointer"
+                        >
+                            See Answer
+                        </button>
+                    )}
+
+                    {onRetake && (
+                        <button
+                            onClick={onRetake}
+                            disabled={retaking}
+                            className="w-full sm:w-auto min-w-[160px] inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {retaking ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <span>Starting…</span>
+                                </>
+                            ) : (
+                                <span>Try Again</span>
+                            )}
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );

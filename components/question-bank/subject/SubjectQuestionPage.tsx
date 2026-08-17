@@ -44,17 +44,22 @@ export default function SubjectQuestionPage() {
     if (!data) return null;
 
     return (
-        <div className="space-y-8">
-            <BackButton fallbackHref="/student/question-bank" />
+        <div className="space-y-6">
+            {/* Header matching Question Bank inline Placement */}
+            <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
+                <div className="shrink-0 sm:absolute sm:left-0 sm:top-0.5 z-10">
+                    <BackButton fallbackHref="/student/question-bank" />
+                </div>
 
-            <div className="text-center">
-                <h1 className="text-3xl font-bold">
-                    {data.subjectName}
-                </h1>
+                <div className="w-full text-center space-y-1 sm:px-24">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                        {data.subjectName}
+                    </h1>
 
-                <p className="text-muted-foreground mt-2">
-                    {data.totalElements} Questions
-                </p>
+                    <p className="text-sm font-medium text-white/70">
+                        {data.totalElements} Questions
+                    </p>
+                </div>
             </div>
 
             <SubjectQuestionSection
@@ -63,7 +68,6 @@ export default function SubjectQuestionPage() {
             />
 
             <div className="flex justify-center gap-4">
-
                 <button
                     disabled={page === 0}
                     onClick={() =>
@@ -89,9 +93,7 @@ export default function SubjectQuestionPage() {
                 >
                     Next
                 </button>
-
             </div>
-
         </div>
     );
 }
