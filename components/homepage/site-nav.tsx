@@ -1,39 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SiteNavBeforeLogin } from "./site-nav-before";
 import { SiteNavAfterLogin } from "./site-nav-after";
+import { logoutUser } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { AUTH_SESSION_QUERY_KEY, useAuthSession } from "@/hooks/useAuthSession";
 
 export function SiteNav() {
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { isAuthenticated, userRole, isLoading } = useAuthSession();
 
-  // Check login state on mount
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    const role = localStorage.getItem("role");
-    if (token) {
-      setIsLoggedIn(true);
-      setUserRole(role);
-    } else {
-      setIsLoggedIn(false);
-      setUserRole(null);
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } catch {
+    } finally {
+      queryClient.removeQueries({ queryKey: AUTH_SESSION_QUERY_KEY });
+      router.push("/");
     }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("role");
-    setIsLoggedIn(false);
-    setUserRole(null);
-    router.push("/");
   };
 
-  if (isLoggedIn) {
+  if (isLoading) {
+    return null;
+  }
+
+  if (isAuthenticated) {
     return <SiteNavAfterLogin userRole={userRole} onLogout={handleLogout} />;
   }
 

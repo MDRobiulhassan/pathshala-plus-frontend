@@ -3,11 +3,13 @@
 import { useState, type ChangeEvent, type FormEvent } from "react"
 import { DM_Sans } from "next/font/google"
 import { Eye, EyeOff } from "lucide-react"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { updateProfile } from "@/lib/api"
+import { passwordSchema } from "@/lib/validation"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -45,33 +47,25 @@ export default function SecurityForm() {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!values.currentPassword || !values.newPassword || !values.confirmNewPassword) {
-      alert("Please fill in all password fields")
-      return
-    }
-
-    if (!PASSWORD_REGEX.test(values.newPassword)) {
-      alert("New password must contain uppercase, lowercase, number and special character (min 8 chars)")
-      return
-    }
-
-    if (values.newPassword !== values.confirmNewPassword) {
-      alert("New password and confirm password do not match")
+    const parsed = passwordSchema.safeParse(values)
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? "Please check your password form"
+      toast.error(message)
       return
     }
 
     try {
       setIsSubmitting(true)
       await updateProfile({
-        currentPassword: values.currentPassword,
-        newPassword: values.newPassword,
-        confirmNewPassword: values.confirmNewPassword,
+        currentPassword: parsed.data.currentPassword,
+        newPassword: parsed.data.newPassword,
+        confirmNewPassword: parsed.data.confirmNewPassword,
       })
-      alert("Password updated successfully")
+      toast.success("Password updated successfully")
       setValues({ currentPassword: "", newPassword: "", confirmNewPassword: "" })
     } catch (error) {
       console.error(error)
-      alert(error instanceof Error ? error.message : "Failed to update password")
+      toast.error(error instanceof Error ? error.message : "Failed to update password")
     } finally {
       setIsSubmitting(false)
     }

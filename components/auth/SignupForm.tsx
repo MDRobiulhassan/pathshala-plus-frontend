@@ -7,6 +7,7 @@ import { DM_Sans, Fredoka } from "next/font/google"
 import {
   Eye,
   EyeOff,
+  Loader2,
 } from "lucide-react"
 import {
   signupUser,
@@ -16,6 +17,8 @@ import {
   EducationLevel,
   Language,
 } from "@/lib/api"
+import { toast } from "sonner"
+import { signupSchema } from "@/lib/validation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -61,7 +64,7 @@ export default function SignupForm({
     email: "",
     password: "",
     confirmPassword: "",
-    preferredLanguageCode: "EN",
+    preferredLanguageCode: "en",
     educationLevelId: "",
     role: "STUDENT",
 
@@ -110,31 +113,18 @@ export default function SignupForm({
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!values.name || !values.email || !values.password || !values.confirmPassword) {
-      alert("Please fill all required fields")
-      return
-    }
-
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$/
-
-    if (!passwordRegex.test(values.password)) {
-      alert(
-        "Password must contain uppercase, lowercase, number and special character"
-      )
-      return
-    }
-
-    if (values.password !== values.confirmPassword) {
-      alert("Passwords do not match")
+    const parsed = signupSchema.safeParse(values)
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? "Please check your form"
+      toast.error(message)
       return
     }
 
     if (!values.educationLevelId) {
       if (departmentOptions.length > 0) {
-        alert("Please select a department.")
+        toast.error("Please select a department.")
       } else {
-        alert("Please select an education level.")
+        toast.error("Please select an education level.")
       }
       return
     }
@@ -143,20 +133,9 @@ export default function SignupForm({
       setIsSubmitting(true)
 
       const data = await signupUser({
-        ...values,
-        educationLevelId: Number(values.educationLevelId),
+        ...parsed.data,
+        educationLevelId: Number(parsed.data.educationLevelId),
       })
-
-
-      localStorage.setItem(
-        "userId",
-        data.userId.toString()
-      )
-
-      localStorage.setItem(
-        "role",
-        data.role
-      )
 
       if (data.role === "TEACHER") {
         router.push("/teacher")
@@ -164,12 +143,10 @@ export default function SignupForm({
         router.push("/student")
       }
     } catch (error) {
-      console.error(error)
-
       if (error instanceof Error) {
-        alert(error.message)
+        toast.error(error.message)
       } else {
-        alert("Signup failed")
+        toast.error("Signup failed")
       }
     } finally {
       setIsSubmitting(false)
@@ -352,15 +329,26 @@ export default function SignupForm({
 
                       if (!selectedLevel) return
 
-                      // reset previous department
-                      setSelectedDepartmentId("")
-                      setValues((prev) => ({
-                        ...prev,
-                        educationLevelId: "",
-                      }))
+                      const hasDepartments = selectedLevel.variants.some(
+                        (v) => Boolean(v.department)
+                      )
 
-                      // show department dropdown whenever variants exist
-                      setDepartmentOptions(selectedLevel.variants)
+                      if (!hasDepartments && selectedLevel.variants.length > 0) {
+                        const defaultVariantId = selectedLevel.variants[0].id.toString()
+                        setSelectedDepartmentId(defaultVariantId)
+                        setValues((prev) => ({
+                          ...prev,
+                          educationLevelId: defaultVariantId,
+                        }))
+                        setDepartmentOptions([])
+                      } else {
+                        setSelectedDepartmentId("")
+                        setValues((prev) => ({
+                          ...prev,
+                          educationLevelId: "",
+                        }))
+                        setDepartmentOptions(selectedLevel.variants)
+                      }
                     }}
                   >
                     <SelectTrigger
@@ -456,16 +444,16 @@ export default function SignupForm({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setValues(prev => ({ ...prev, role: "TEACHER" }))}
+                    disabled
                     className={cn(
                       dmSans.className,
-                      "flex items-center justify-center text-[14px] font-[700] h-[40.4px] transition-all duration-200 cursor-pointer",
-                      values.role === "TEACHER"
-                        ? "rounded-[12px] border-[0.8px] border-[#14B8A6] bg-[rgba(20,184,166,0.08)] shadow-[inset_0_0_0_1px_#14B8A6,0_0_16px_rgba(20,184,166,0.12)] text-[#14B8A6]"
-                        : "rounded-[12px] border-[0.8px] border-white/6 bg-transparent text-white/60 hover:text-white hover:border-white/20"
+                      "flex items-center justify-center gap-1.5 text-[13px] font-[700] h-[40.4px] rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] text-white/40 cursor-not-allowed opacity-60"
                     )}
                   >
-                    Teacher
+                    <span>Teacher</span>
+                    <span className="text-[9px] font-[700] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 uppercase tracking-wider">
+                      Upcoming
+                    </span>
                   </button>
                 </div>
               </div>
@@ -481,10 +469,17 @@ export default function SignupForm({
                 disabled={isSubmitting}
                 className={cn(
                   dmSans.className,
-                  "w-full h-[44.8px] rounded-[12px] bg-[#14B8A6] text-[#060910] hover:bg-[#14B8A6]/90 font-[900] text-[15px] uppercase tracking-wider shadow-[0_0_22px_rgba(20,184,166,0.25)] border-none transition-all duration-200 cursor-pointer disabled:opacity-50"
+                  "w-full h-[44.8px] rounded-[12px] bg-[#14B8A6] text-[#060910] hover:bg-[#14B8A6]/90 font-[900] text-[15px] uppercase tracking-wider shadow-[0_0_22px_rgba(20,184,166,0.25)] border-none transition-all duration-200 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
                 )}
               >
-                {isSubmitting ? "Creating Account..." : "Create Account"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Creating Account...</span>
+                  </>
+                ) : (
+                  "Create Account"
+                )}
               </Button>
 
               {/* OR Divider */}

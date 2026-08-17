@@ -1,30 +1,23 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getProfile, UserProfileResponse } from "@/lib/api"
+import { UserProfileResponse } from "@/lib/api"
 import ProfilePhotoHeader from "./ProfilePhotoHeader"
 import ProfileInfoForm from "./ProfileInfoForm"
 import SecurityForm from "./SecurityForm"
+import { useAuthSession } from "@/hooks/useAuthSession"
 
 export default function ProfilePageContent() {
   const [profile, setProfile] = useState<UserProfileResponse | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const { profile: sessionProfile, isLoading, error } = useAuthSession()
 
   useEffect(() => {
-    async function loadProfile() {
-      try {
-        const data = await getProfile()
-        setProfile(data)
-      } catch (error) {
-        console.error(error)
-        setLoadError(error instanceof Error ? error.message : "Failed to load profile")
-      } finally {
-        setIsLoading(false)
-      }
+    if (sessionProfile) {
+      setProfile(sessionProfile)
     }
-    loadProfile()
-  }, [])
+  }, [sessionProfile])
+
+  const loadError = error ? error.message : null
 
   return (
     <div className="max-w-[640px] mx-auto py-6 flex flex-col gap-6">

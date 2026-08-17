@@ -3,6 +3,7 @@
 import { useRef, useState, type ChangeEvent } from "react"
 import { Camera } from "lucide-react"
 import { DM_Sans } from "next/font/google"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { uploadAvatar } from "@/lib/api"
 
@@ -31,11 +32,11 @@ export default function ProfilePhotoHeader({
     if (!file) return
 
     if (!file.type.startsWith("image/")) {
-      alert("Please select an image file")
+      toast.error("Please select an image file")
       return
     }
     if (file.size > 200 * 1024) {
-      alert("Image must be under 200KB")
+      toast.error("Image must be under 200KB")
       return
     }
 
@@ -45,7 +46,7 @@ export default function ProfilePhotoHeader({
       onAvatarUpdated(newUrl)
     } catch (error) {
       console.error(error)
-      alert(error instanceof Error ? error.message : "Failed to upload photo")
+      toast.error(error instanceof Error ? error.message : "Failed to upload photo")
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ""

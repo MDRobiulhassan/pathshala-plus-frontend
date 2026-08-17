@@ -35,7 +35,7 @@ export default function InstituteCard({
                     );
                 } else {
                     router.push(
-                        `/student/question-bank/institute/${institute.id}/exam-sessions`
+                        `/student/question-bank/institute/${institute.id}/exam-session`
                     );
                 }
             }}

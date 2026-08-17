@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getProfile } from "@/lib/api";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 export type UserProfile = {
     id: number
@@ -24,26 +23,10 @@ export type UserProfile = {
 }
 
 export function useProfile() {
-    const [profile, setProfile] = useState<UserProfile | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        async function loadProfile() {
-            try {
-                const data = await getProfile();
-                setProfile(data);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        loadProfile();
-    }, []);
+    const { profile, isLoading } = useAuthSession();
 
     return {
         profile,
-        loading,
+        loading: isLoading,
     };
 }
