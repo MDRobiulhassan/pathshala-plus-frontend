@@ -21,16 +21,22 @@ export default function SubjectQuestionPage() {
 
     if (loading) {
         return (
-            <div className="py-20 text-center">
-                <Loader />
+            <div className="space-y-6">
+                <BackButton fallbackHref="/student/question-bank" />
+                <div className="py-20 text-center">
+                    <Loader />
+                </div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="py-20 text-center text-red-500">
-                {error}
+            <div className="space-y-6">
+                <BackButton fallbackHref="/student/question-bank" />
+                <div className="py-20 text-center text-red-500">
+                    {error}
+                </div>
             </div>
         );
     }
@@ -39,7 +45,7 @@ export default function SubjectQuestionPage() {
 
     return (
         <div className="space-y-8">
-            <BackButton />
+            <BackButton fallbackHref="/student/question-bank" />
 
             <div className="text-center">
                 <h1 className="text-3xl font-bold">
@@ -53,6 +59,7 @@ export default function SubjectQuestionPage() {
 
             <SubjectQuestionSection
                 passages={data.passages}
+                startQuestionNumber={page * 20 + 1}
             />
 
             <div className="flex justify-center gap-4">

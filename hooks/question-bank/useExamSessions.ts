@@ -3,19 +3,20 @@
 import { useEffect, useState } from "react";
 import {
     ExamSession,
+    getInstituteExamSessions,
     getUnitExamSessions,
 } from "@/lib/api";
 
 export default function useExamSessions(
     instituteId: number,
-    unitId: number
+    unitId?: number
 ) {
     const [examSessions, setExamSessions] = useState<ExamSession[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (!instituteId || !unitId) {
+        if (!instituteId) {
             setLoading(false);
             return;
         }
@@ -24,10 +25,9 @@ export default function useExamSessions(
             try {
                 setLoading(true);
 
-                const data = await getUnitExamSessions(
-                    instituteId,
-                    unitId
-                );
+                const data = unitId && !isNaN(unitId)
+                    ? await getUnitExamSessions(instituteId, unitId)
+                    : await getInstituteExamSessions(instituteId);
 
                 setExamSessions(data);
             } catch (err: any) {

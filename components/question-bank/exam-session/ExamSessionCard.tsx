@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 type Props = {
     examSession: ExamSession;
     instituteId: number;
-    unitId: number;
+    unitId?: number;
 };
 
 export default function ExamSessionCard({
@@ -18,14 +18,14 @@ export default function ExamSessionCard({
     const router = useRouter();
 
     const handleClick = () => {
+        const basePath = unitId
+            ? `/student/question-bank/institute/${instituteId}/unit/${unitId}/exam-session/${examSession.id}`
+            : `/student/question-bank/institute/${instituteId}/exam-session/${examSession.id}`;
+
         if (examSession.hasShift) {
-            router.push(
-                `/student/question-bank/institute/${instituteId}/unit/${unitId}/exam-session/${examSession.id}/shift`
-            );
+            router.push(`${basePath}/shift`);
         } else {
-            router.push(
-                `/student/question-bank/institute/${instituteId}/unit/${unitId}/exam-session/${examSession.id}`
-            );
+            router.push(basePath);
         }
     };
 

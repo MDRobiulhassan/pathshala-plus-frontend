@@ -46,6 +46,13 @@ const navItems = [
     },
 ];
 
+function checkIsActive(pathname: string, href: string): boolean {
+    if (href === "/student" || href === "/teacher") {
+        return pathname === "/student" || pathname === "/teacher";
+    }
+    return pathname.startsWith(href);
+}
+
 export default function SidebarNav({
     collapsed,
 }: SidebarNavProps) {
@@ -60,7 +67,7 @@ export default function SidebarNav({
                     label={item.label}
                     icon={item.icon}
                     collapsed={collapsed}
-                    active={pathname === item.href}
+                    active={checkIsActive(pathname, item.href)}
                 />
             ))}
         </nav>

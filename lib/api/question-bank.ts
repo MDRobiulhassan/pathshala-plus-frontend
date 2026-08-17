@@ -211,6 +211,15 @@ export async function getShifts(unitId: number, examSessionId: number): Promise<
   }
 }
 
+export async function getExamInfoByExamSession(examSessionId: number): Promise<ExamInfo[]> {
+  try {
+    const response = await api.get(`/exam-session/${examSessionId}/exam-info`);
+    return response.data.data;
+  } catch (error: any) {
+    throw new Error(getApiErrorMessage(error, "Failed to fetch exam info"));
+  }
+}
+
 export async function getExamInfoByUnit(unitId: number, examSessionId: number): Promise<ExamInfo[]> {
   try {
     const response = await api.get(`/unit/${unitId}/exam-session/${examSessionId}/exam-info`);

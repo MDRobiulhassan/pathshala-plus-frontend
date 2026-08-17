@@ -9,14 +9,15 @@ import Loader from "@/components/ui/Loader";
 export default function ExamInfoPage() {
     const params = useParams();
 
-    const unitId = Number(params.unitId);
     const examSessionId = Number(params.examSessionId);
+    const unitId = params.unitId ? Number(params.unitId) : undefined;
+    const shiftId = params.shiftId ? Number(params.shiftId) : undefined;
 
     const {
         examInfos,
         loading,
         error,
-    } = useExamInfo(unitId, examSessionId);
+    } = useExamInfo(examSessionId, unitId, shiftId);
 
     if (loading) {
         return (

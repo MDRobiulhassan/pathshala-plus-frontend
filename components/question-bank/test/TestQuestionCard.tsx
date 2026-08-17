@@ -2,6 +2,7 @@
 
 import { Question } from "@/lib/api";
 import OptionButton from "../Shared/OptionButton";
+import ExplanationBox from "../Shared/ExplanationBox";
 
 type Props = {
     question: Question;
@@ -55,29 +56,8 @@ export default function TestQuestionCard({
                     />
                 ))}
             </div>
-            <div className="border-t pt-4 space-y-2">
 
-                <h3 className="font-semibold">
-                    Explanation
-                </h3>
-
-                {question.explanation ? (
-                    <p className="text-muted-foreground">
-                        {question.explanation}
-                    </p>
-                ) : (
-                    <p className="text-sm text-muted-foreground">
-                        Reasoning available for{" "}
-                        <span className="font-semibold text-primary">
-                            Pro members
-                        </span>
-                        .
-                        <br />
-                        Upgrade to Pro to view the explanation.
-                    </p>
-                )}
-
-            </div>
+            <ExplanationBox explanation={question.explanation} />
         </div>
     );
 }

@@ -6,7 +6,7 @@ import ExamSessionCard from "./ExamSessionCard";
 type Props = {
     examSessions: ExamSession[];
     instituteId: number;
-    unitId: number;
+    unitId?: number;
 };
 
 export default function ExamSessionGrid({

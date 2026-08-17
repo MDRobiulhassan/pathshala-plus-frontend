@@ -10,7 +10,7 @@ export default function ExamSessionPage() {
     const params = useParams();
 
     const instituteId = Number(params.instituteId);
-    const unitId = Number(params.unitId)
+    const unitId = params.unitId ? Number(params.unitId) : undefined;
 
     const {
         examSessions,
