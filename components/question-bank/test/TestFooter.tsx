@@ -22,14 +22,14 @@ export default function TestFooter({
 }: Props) {
     return (
         <div className="sticky bottom-3 z-30 mx-auto max-w-5xl rounded-2xl border border-white/10 bg-[#0C1120] p-3 sm:p-4 shadow-2xl">
-            {/* Desktop View (sm: and above) */}
+            {/* Desktop View  */}
             <div className="hidden sm:grid sm:grid-cols-3 sm:items-center">
-                {/* Left: Timer */}
+                {/* Timer */}
                 <div className="flex justify-start">
                     <Timer duration={duration} startedAt={startedAt} onExpire={onSubmit} />
                 </div>
 
-                {/* Center: Submit Button */}
+                {/* Submit Button */}
                 <div className="flex justify-center">
                     <button
                         onClick={onSubmit}
@@ -47,13 +47,13 @@ export default function TestFooter({
                     </button>
                 </div>
 
-                {/* Right: Question Count */}
+                {/* Question Count */}
                 <div className="flex justify-end text-sm font-medium text-white/80">
                     <span>{current} / {total} Questions</span>
                 </div>
             </div>
 
-            {/* Mobile View (< sm) */}
+            {/* Mobile View */}
             <div className="flex flex-col gap-2 sm:hidden">
                 <div className="flex items-center justify-between text-xs font-medium text-white/80 px-1">
                     <Timer duration={duration} startedAt={startedAt} onExpire={onSubmit} />

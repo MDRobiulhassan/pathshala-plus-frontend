@@ -77,7 +77,6 @@ export default function ProfilePhotoHeader({
       >
         <div className="w-24 h-24 rounded-full bg-[#14B8A6]/10 border-[0.8px] border-[#14B8A6]/30 flex items-center justify-center overflow-hidden">
           {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
           ) : (
             <span className={cn(dmSans.className, "text-[#14B8A6] text-[32px] font-[700]")}>

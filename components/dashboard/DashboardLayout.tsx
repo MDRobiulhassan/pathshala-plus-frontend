@@ -11,9 +11,7 @@ type DashboardLayoutProps = {
     children: React.ReactNode;
 };
 
-/** Derive a human-readable page title from the current pathname */
 function getPageTitle(pathname: string): string {
-    // Strip leading role prefix (/student or /teacher)
     const withoutRole = pathname.replace(/^\/(student|teacher)/, "") || "/";
 
     const titleMap: Record<string, string> = {
@@ -27,7 +25,6 @@ function getPageTitle(pathname: string): string {
         "/profile": "Profile",
     };
 
-    // Match exact or prefix
     for (const [key, label] of Object.entries(titleMap)) {
         if (key !== "/" && withoutRole.startsWith(key)) return label;
     }

@@ -20,16 +20,12 @@ export function useSubjects() {
             setLoading(true);
             setError(null);
 
-            // Step 1
             if (!profile) {
                 throw new Error("Failed to load session.");
             }
-
-            // Step 2
             const educationLevels =
                 await getEducationLevels();
 
-            // Step 3
             const educationLevel =
                 educationLevels.find(
                     (level) =>
@@ -42,7 +38,6 @@ export function useSubjects() {
                 );
             }
 
-            // Step 4
             const variant =
                 educationLevel.variants.find(
                     (variant) =>
@@ -56,7 +51,6 @@ export function useSubjects() {
                 );
             }
 
-            // Step 5
             const data =
                 await getSubjects(variant.id);
 

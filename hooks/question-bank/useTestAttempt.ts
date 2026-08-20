@@ -46,13 +46,11 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
                 const details = await getTestAttemptWithQuestions(targetAttemptId);
                 setAttemptDetails(details);
 
-                // Check if result exists for target attempt
                 try {
                     const res = await getTestAttemptResult(targetAttemptId);
                     isCompletedRef.current = true;
                     setResult(res);
                 } catch (e) {
-                    // In-progress attempt
                     isCompletedRef.current = false;
                     setResult(null);
                 }
@@ -72,7 +70,6 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
                         const res = await getTestAttemptResult(targetAttemptId);
                         setResult(res);
                     } catch (e) {
-                        // Ignore
                     }
                 } else {
                     isCompletedRef.current = false;
@@ -80,7 +77,6 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
                 }
             }
 
-            // Enrich question metadata for Practice mode (isCorrect & explanation)
             if (attemptDetails?.testInfo?.examInfoId || (attemptIdFromQuery && attemptDetails?.testInfo?.examInfoId)) {
                 const examInfoId = attemptDetails?.testInfo?.examInfoId;
                 if (examInfoId) {
@@ -128,12 +124,9 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
                             });
                         }
                     } catch (e) {
-                        // Silently ignore metadata load failure
                     }
                 }
             }
-
-            // Populate pre-selected options if any
             if (attemptDetails?.subjects) {
                 const preSelected: Record<number, number> = {};
                 attemptDetails.subjects.forEach((subject) => {
@@ -158,18 +151,14 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
         }
     }, [testId, attemptIdFromQuery]);
 
-    // Initial load when testId or attemptIdFromQuery changes
     useEffect(() => {
         initTest();
     }, [testId, attemptIdFromQuery, initTest]);
-
-    // Option selection
     const selectOption = useCallback((questionId: number, optionId: number) => {
         if (isCompletedRef.current) return;
         setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
     }, []);
 
-    // Debounced Auto-Save Progress
     useEffect(() => {
         if (!attemptDetails || loading || submitting || result || isCompletedRef.current) return;
 
@@ -193,7 +182,6 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
                 try {
                     await saveTestProgress(attemptId, answerPayload);
                 } catch (e: any) {
-                    // Silently ignore background save errors to prevent disturbing user
                 }
             }
         }, 1200);
@@ -205,7 +193,6 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
         };
     }, [answers, attemptDetails, loading, submitting, result]);
 
-    // Submit Test Attempt
     const submit = useCallback(async () => {
         if (!attemptDetails || submitting) return;
 
@@ -228,27 +215,22 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
                 })
             );
 
-            // Attempt flushing progress
             if (answerPayload.length > 0 && !isCompletedRef.current) {
                 try {
                     await saveTestProgress(attemptId, answerPayload);
                 } catch (e) {
-                    // Ignore save error if attempt is already being submitted
                 }
             }
 
-            // Submit attempt
             if (!isCompletedRef.current) {
                 try {
                     await submitTestAttempt(attemptId);
                 } catch (e) {
-                    // Ignore if already submitted on backend
                 }
             }
 
             isCompletedRef.current = true;
 
-            // Fetch and set attempt result
             const res = await getTestAttemptResult(attemptId);
             setResult(res);
         } catch (err: any) {
@@ -258,7 +240,6 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
         }
     }, [attemptDetails, answers, submitting]);
 
-    // Retake Test
     const retake = useCallback(() => {
         setAnswers({});
         setResult(null);

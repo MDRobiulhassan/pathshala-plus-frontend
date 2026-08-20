@@ -26,7 +26,6 @@ export default function AttemptResult({ result, onRetry }: Props) {
         : 0;
     const passed = summary.passed;
 
-    // Flatten all questions from result for the review section
     const allQuestions: TestResultQuestion[] = subjects.flatMap((s) =>
         s.chapters.flatMap((c) =>
             c.passages.flatMap((p) => p.questions)

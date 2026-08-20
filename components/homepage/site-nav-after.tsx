@@ -88,7 +88,6 @@ export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
 
         {/* RIGHT CONTROLS */}
         <div className="flex items-center gap-3">
-          {/* UNIFIED USER DROPDOWN (Reused from Dashboard Topbar) */}
           <UserDropdown />
 
           {/* MOBILE MENU TRIGGER */}

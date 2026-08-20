@@ -74,7 +74,6 @@ export default function TestPage() {
     const totalMarks = testInfo?.totalMarks || 100;
     const negativeMark = testInfo?.negativeMarksPerQuestion || 25;
 
-    // Use result subjects in review mode (they carry correctOption & selected flags)
     const displaySubjects: any[] = reviewMode && result ? result.subjects as any : subjects;
 
     let globalQuestionNum = 0;
@@ -113,7 +112,6 @@ export default function TestPage() {
 
                 return (
                     <div key={subject.subjectId} className="space-y-8 pt-2">
-                        {/* Subject header matching question bank style */}
                         <div className="text-center border-b border-white/10 pb-4">
                             <h2 className="text-3xl font-bold text-white tracking-tight">
                                 {subject.subjectName} ({subjectQuestionCount})

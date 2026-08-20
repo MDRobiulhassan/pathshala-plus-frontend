@@ -92,9 +92,8 @@ export default function UserDropdown() {
 
                 <ChevronDown
                     size={18}
-                    className={`text-white/50 transition-transform duration-200 ${
-                        open ? "rotate-180" : ""
-                    }`}
+                    className={`text-white/50 transition-transform duration-200 ${open ? "rotate-180" : ""
+                        }`}
                 />
             </button>
 
@@ -124,7 +123,6 @@ export default function UserDropdown() {
                     </div>
 
                     <div className="py-1">
-                        {/* 1. Dashboard option (Hidden if already on Dashboard) */}
                         {!isDashboardPage && (
                             <button
                                 type="button"
@@ -151,7 +149,6 @@ export default function UserDropdown() {
                             </button>
                         )}
 
-                        {/* 2. Profile option (Hidden if already on Profile page) */}
                         {!isProfilePage && (
                             <button
                                 type="button"
@@ -178,7 +175,6 @@ export default function UserDropdown() {
                             </button>
                         )}
 
-                        {/* 3. Wallet option (Always present, marked as Upcoming) */}
                         <div
                             className="
                                 flex

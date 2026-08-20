@@ -28,27 +28,21 @@ export default function ContinueLearningCard({
 }: Props) {
     const router = useRouter();
 
-    // Filter running/in-progress attempts (where finishedAt is null)
     const runningTests = activeTests.filter((t) => !t.finishedAt);
 
-    // Timed test item
     const timedTest = runningTests.find((t) => !t.isPractice) || activeTests.find((t) => !t.isPractice);
 
-    // Practice test item
     const practiceTest = runningTests.find((t) => t.isPractice) || activeTests.find((t) => t.isPractice);
 
-    // Fallback test ID if none exists yet
     const targetTestId = timedTest?.testId || practiceTest?.testId || 1;
 
     const handleTimedClick = () => {
         const id = timedTest?.testId || targetTestId;
-        // Navigate directly to the test screen to take / resume test
         router.push(`/student/question-bank/exam-info/${id}/test?testId=${id}`);
     };
 
     const handlePracticeClick = () => {
         const id = practiceTest?.testId || targetTestId;
-        // Navigate directly to the practice screen to practice
         router.push(`/student/question-bank/exam-info/${id}/practice?testId=${id}`);
     };
 

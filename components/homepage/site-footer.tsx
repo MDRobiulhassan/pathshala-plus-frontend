@@ -85,7 +85,7 @@ function BrandColumn() {
         <li className="flex items-center gap-3">
           <div className="flex h-5 w-5 items-center justify-center shrink-0">
             <Image
-              src="/icons/phone (1).png"
+              src="/icons/phone.png"
               alt="Phone"
               width={16}
               height={16}
@@ -98,7 +98,7 @@ function BrandColumn() {
         <li className="flex items-center gap-3">
           <div className="flex h-5 w-5 items-center justify-center shrink-0">
             <Image
-              src="/icons/mail (1).png"
+              src="/icons/mail.png"
               alt="Email"
               width={16}
               height={16}

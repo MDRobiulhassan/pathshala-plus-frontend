@@ -61,7 +61,6 @@ export default function PracticeQuestionCard({
 
             <div className="grid grid-cols-2 gap-5">
                 {question.options.map((option) => {
-                    // Crucial: Only isCorrect or correctOption indicates the correct answer. Never option.selected!
                     const isRightOption = Boolean(option.isCorrect || option.correctOption);
                     let className =
                         "rounded-xl border p-4 text-left transition cursor-pointer disabled:cursor-default";

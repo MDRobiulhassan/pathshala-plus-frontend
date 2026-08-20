@@ -98,7 +98,6 @@ const roleLabel = profile.roles?.[0]
       }
     }
     loadData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const onTextChange = (event: ChangeEvent<HTMLInputElement>) => {

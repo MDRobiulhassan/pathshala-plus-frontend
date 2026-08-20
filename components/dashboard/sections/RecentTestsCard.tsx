@@ -24,7 +24,6 @@ export default function RecentTestsCard({
     const router = useRouter();
     const [showAllAttemptsModal, setShowAllAttemptsModal] = useState(false);
 
-    // Strictly limit dashboard card display to 5 recent tests
     const displayedTests = recentTests.slice(0, 5);
 
     const handleNavigate = (testId: number, attemptId: number) => {

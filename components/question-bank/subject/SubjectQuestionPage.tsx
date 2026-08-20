@@ -45,7 +45,6 @@ export default function SubjectQuestionPage() {
 
     return (
         <div className="space-y-6">
-            {/* Header matching Question Bank inline Placement */}
             <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
                 <div className="shrink-0 sm:absolute sm:left-0 sm:top-0.5 z-10">
                     <BackButton fallbackHref="/student/question-bank" />

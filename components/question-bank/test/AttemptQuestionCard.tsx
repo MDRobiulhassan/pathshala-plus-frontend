@@ -7,7 +7,6 @@ type Props = {
     question: TestAttemptQuestion;
     questionNumber: number;
     selectedOptionId?: number;
-    /** Practice mode: show correct/wrong instantly after selection */
     showResult?: boolean;
     onSelect: (questionId: number, optionId: number) => void;
 };
@@ -42,7 +41,7 @@ export default function AttemptQuestionCard({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {question.options.map((option) => {
                     const isSelected = selectedOptionId === option.optionId;
-                    const isCorrect = option.selected; // in result view; not visible in timed
+                    const isCorrect = option.selected;
                     const showCorrect = showResult && answered && isCorrect;
                     const showWrong = showResult && isSelected && !isCorrect;
 

@@ -12,6 +12,7 @@ export type Subject = {
   subjectId: number;
   subjectName: string;
   educationLevelId: number;
+  logoUrl?: string | null;
 };
 
 export type Unit = {

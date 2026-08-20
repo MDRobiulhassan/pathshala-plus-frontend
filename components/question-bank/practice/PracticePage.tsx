@@ -54,7 +54,6 @@ export default function PracticePage() {
         );
     }
 
-    // After submitting show the TestResult card (with See Answer & Try Again)
     if (result && !reviewMode) {
         return (
             <TestResult
@@ -78,7 +77,6 @@ export default function PracticePage() {
     const totalMarks = testInfo?.totalMarks || 100;
     const negativeMark = testInfo?.negativeMarksPerQuestion || 25;
 
-    // Use result subjects for review mode so we get correctOption etc.
     const displaySubjects = reviewMode && result
         ? result.subjects as any[]
         : attemptDetails.subjects;
@@ -115,7 +113,6 @@ export default function PracticePage() {
 
                 return (
                     <div key={subject.subjectId} className="space-y-8 pt-2">
-                        {/* Subject header matching question bank style */}
                         <div className="text-center border-b border-white/10 pb-4">
                             <h2 className="text-3xl font-bold text-white tracking-tight">
                                 {subject.subjectName} ({subjectQuestionCount})
@@ -181,7 +178,7 @@ export default function PracticePage() {
                 );
             })}
 
-            {/* Sticky footer matching timed test style */}
+            {/* Sticky footer */}
             {!reviewMode && (
                 <div className="sticky bottom-3 z-30 mx-auto max-w-5xl rounded-2xl border border-white/10 bg-[#0C1120] p-3 sm:p-4 shadow-2xl">
                     {/* Desktop View */}
