@@ -16,6 +16,14 @@ const nextConfig: NextConfig = {
         hostname: "platform-lookaside.fbsbx.com",
       },
       {
+        protocol: "https",
+        hostname: "*.supabase.co",
+      },
+      {
+        protocol: "https",
+        hostname: "supabase.co",
+      },
+      {
         protocol: "http",
         hostname: "localhost",
       },

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ChevronDown, Menu, X, LogOut, LayoutDashboard, User, Wallet } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard } from "lucide-react";
+import UserDropdown from "@/components/topbar/UserDropdown";
 
 type Props = {
   userRole: string | null;
@@ -12,24 +12,7 @@ type Props = {
 };
 
 export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const pathname = usePathname();
-
-  const isDashboardPage = pathname === "/student" || pathname === "/teacher" || pathname.startsWith("/dashboard");
-  const isProfilePage = pathname.includes("/profile");
-
-  // Close dropdown on click outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const dashboardPath = userRole === "TEACHER" ? "/teacher" : "/student";
 
@@ -105,155 +88,8 @@ export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
 
         {/* RIGHT CONTROLS */}
         <div className="flex items-center gap-3">
-          {/* PROFILE DROPDOWN */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              type="button"
-              aria-label="Account menu"
-              aria-expanded={dropdownOpen}
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="
-                group
-                flex
-                h-[52px]
-                items-center
-                gap-2
-                rounded-[1rem]
-                border
-                border-white/[0.06]
-                bg-[rgba(21,30,54,0.82)]
-                px-3
-                backdrop-blur-md
-                transition-all
-                duration-200
-                hover:border-cyan-400/20
-                cursor-pointer
-              "
-            >
-              <div
-                className="
-                  relative
-                  flex
-                  h-9
-                  w-9
-                  items-center
-                  justify-center
-                  overflow-hidden
-                  rounded-full
-                "
-              >
-                <Image
-                  src="/icons/man.png"
-                  alt="User Profile"
-                  width={36}
-                  height={36}
-                  className="object-cover"
-                />
-              </div>
-
-              <ChevronDown
-                aria-hidden="true"
-                className={`
-                  size-4
-                  text-cyan-400
-                  transition-transform
-                  duration-200
-                  ${dropdownOpen ? "rotate-180" : "group-hover:translate-y-[1px]"}
-                `}
-              />
-            </button>
-
-            {/* DROPDOWN MENU */}
-            {dropdownOpen && (
-              <div
-                className="
-                  absolute
-                  right-0
-                  mt-2
-                  w-52
-                  origin-top-right
-                  rounded-2xl
-                  border
-                  border-white/[0.08]
-                  bg-[#0C1222]
-                  p-2
-                  shadow-2xl
-                  backdrop-blur-xl
-                  z-50
-                  animate-in
-                  fade-in
-                  slide-in-from-top-2
-                  duration-200
-                "
-              >
-                <div className="px-3 py-2 text-xs text-white/40 font-medium">
-                  Signed in as {userRole?.toLowerCase()}
-                </div>
-                <div className="h-px bg-white/[0.06] my-1" />
-
-                <div className="py-1">
-                  {/* Dashboard — hidden when already on dashboard */}
-                  {!isDashboardPage && (
-                    <Link
-                      href={dashboardPath}
-                      onClick={() => setDropdownOpen(false)}
-                      className="
-                        flex items-center gap-2.5 w-full rounded-xl
-                        px-3 py-2.5 text-sm font-semibold
-                        text-white/80 hover:bg-white/[0.05] hover:text-white transition-colors
-                      "
-                    >
-                      <LayoutDashboard className="size-4 text-cyan-400" />
-                      Dashboard
-                    </Link>
-                  )}
-
-                  {/* Profile — hidden when already on profile page */}
-                  {!isProfilePage && (
-                    <Link
-                      href={userRole === "TEACHER" ? "/teacher/profile" : "/student/profile"}
-                      onClick={() => setDropdownOpen(false)}
-                      className="
-                        flex items-center gap-2.5 w-full rounded-xl
-                        px-3 py-2.5 text-sm font-semibold
-                        text-white/80 hover:bg-white/[0.05] hover:text-white transition-colors
-                      "
-                    >
-                      <User className="size-4 text-cyan-400" />
-                      Profile
-                    </Link>
-                  )}
-
-                  {/* Wallet — always shown, disabled with Upcoming badge */}
-                  <div className="flex items-center justify-between px-3 py-2.5 text-sm text-white/35 cursor-not-allowed opacity-60">
-                    <div className="flex items-center gap-2.5">
-                      <Wallet className="size-4" />
-                      <span>Wallet</span>
-                    </div>
-                    <span className="text-[9px] font-[700] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 uppercase tracking-wider">
-                      Upcoming
-                    </span>
-                  </div>
-                </div>
-
-                <div className="h-px bg-white/[0.06] my-1" />
-
-                <button
-                  type="button"
-                  onClick={onLogout}
-                  className="
-                    flex items-center gap-2.5 w-full rounded-xl
-                    px-3 py-2.5 text-sm font-semibold
-                    text-red-400 hover:bg-red-500/10 hover:text-red-300
-                    transition-colors text-left cursor-pointer
-                  "
-                >
-                  <LogOut className="size-4" />
-                  Log out
-                </button>
-              </div>
-            )}
-          </div>
+          {/* UNIFIED USER DROPDOWN (Reused from Dashboard Topbar) */}
+          <UserDropdown />
 
           {/* MOBILE MENU TRIGGER */}
           <button

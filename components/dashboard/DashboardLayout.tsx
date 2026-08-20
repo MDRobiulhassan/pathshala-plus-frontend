@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 
@@ -41,7 +41,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const title = getPageTitle(pathname);
 
     return (
-        <div className="flex h-screen bg-[#060910] overflow-hidden">
+        <div className="flex h-screen min-h-0 bg-[#060910] overflow-hidden">
             {/* Desktop Sidebar */}
             <div className="hidden md:block">
                 <Sidebar
@@ -62,7 +62,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     <div className="fixed inset-y-0 left-0 z-50 md:hidden">
                         <Sidebar
                             collapsed={false}
-                            setCollapsed={() => {}}
+                            setCollapsed={() => { }}
                             onClose={() => setMobileOpen(false)}
                         />
                     </div>
@@ -70,7 +70,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             )}
 
             {/* Main content */}
-            <main className="flex flex-1 flex-col overflow-hidden min-w-0">
+            <main className="flex flex-1 flex-col overflow-hidden min-w-0 min-h-0">
                 <Topbar
                     title={title}
                     mobileMenuButton={

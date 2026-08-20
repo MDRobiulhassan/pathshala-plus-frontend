@@ -75,11 +75,32 @@ api.interceptors.response.use(
   }
 );
 
-export function getApiErrorMessage(error: any, fallback: string) {
+export function getApiErrorMessage(error: any, fallback: string): string {
   if (axios.isAxiosError(error)) {
+    const data = error.response?.data;
+    const subErrors = data?.error?.subErrors || data?.subErrors;
+
+    if (Array.isArray(subErrors) && subErrors.length > 0) {
+      const formatted = subErrors
+        .map((err: any) => {
+          if (typeof err === "string") return err;
+          if (err && typeof err === "object") {
+            if (err.field && err.message) return `${err.field}: ${err.message}`;
+            if (err.message) return err.message;
+          }
+          return String(err);
+        })
+        .filter(Boolean)
+        .join("; ");
+
+      if (formatted) {
+        return formatted;
+      }
+    }
+
     return (
-      error.response?.data?.error?.message ??
-      error.response?.data?.message ??
+      data?.error?.message ??
+      data?.message ??
       fallback
     );
   }

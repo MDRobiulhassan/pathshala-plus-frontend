@@ -31,12 +31,17 @@ export default function ProfilePhotoHeader({
     const file = event.target.files?.[0]
     if (!file) return
 
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file")
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+      toast.error("Invalid file format. Only JPG, PNG, and WEBP images are allowed.")
+      if (fileInputRef.current) fileInputRef.current.value = ""
       return
     }
-    if (file.size > 200 * 1024) {
-      toast.error("Image must be under 200KB")
+
+    const maxSizeBytes = 2 * 1024 * 1024 // 2MB
+    if (file.size > maxSizeBytes) {
+      toast.error("File size exceeds 2MB limit.")
+      if (fileInputRef.current) fileInputRef.current.value = ""
       return
     }
 
@@ -44,6 +49,7 @@ export default function ProfilePhotoHeader({
       setIsUploading(true)
       const newUrl = await uploadAvatar(file)
       onAvatarUpdated(newUrl)
+      toast.success("Profile photo updated successfully")
     } catch (error) {
       console.error(error)
       toast.error(error instanceof Error ? error.message : "Failed to upload photo")
@@ -58,7 +64,7 @@ export default function ProfilePhotoHeader({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/jpg,image/png,image/webp"
         onChange={onFileSelected}
         className="hidden"
       />
@@ -94,7 +100,7 @@ export default function ProfilePhotoHeader({
       <div>
         <p className={cn(dmSans.className, "text-white text-[18px] font-[800]")}>{name}</p>
         <p className={cn(dmSans.className, "text-white/40 text-[11px] font-[400] mt-1 max-w-[240px]")}>
-          Click on the image to upload a new profile picture. JPG, PNG, or WEBP. Max 200KB.
+          Click on the image to upload a new profile picture. JPG, PNG, or WEBP. Max 2MB.
         </p>
       </div>
     </div>

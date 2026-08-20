@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { updateProfile } from "@/lib/api"
+import { changePassword } from "@/lib/api"
 import { passwordSchema } from "@/lib/validation"
 
 const dmSans = DM_Sans({
@@ -19,8 +19,6 @@ const dmSans = DM_Sans({
 
 const focusRingClasses =
   "focus:border-[#14B8A6]/50 focus:ring-1 focus:ring-[#14B8A6]/25 focus:shadow-[0_0_0_1px_rgba(20,184,166,0.25),0_0_18px_rgba(20,184,166,0.08)] focus-visible:border-[#14B8A6]/50 focus-visible:ring-[#14B8A6]/25 focus-visible:shadow-[0_0_0_1px_rgba(20,184,166,0.25),0_0_18px_rgba(20,184,166,0.08)] focus-visible:outline-none"
-
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).{8,}$/
 
 type PasswordValues = {
   currentPassword: string
@@ -56,16 +54,16 @@ export default function SecurityForm() {
 
     try {
       setIsSubmitting(true)
-      await updateProfile({
+      await changePassword({
         currentPassword: parsed.data.currentPassword,
         newPassword: parsed.data.newPassword,
         confirmNewPassword: parsed.data.confirmNewPassword,
       })
-      toast.success("Password updated successfully")
+      toast.success("Password changed successfully")
       setValues({ currentPassword: "", newPassword: "", confirmNewPassword: "" })
     } catch (error) {
       console.error(error)
-      toast.error(error instanceof Error ? error.message : "Failed to update password")
+      toast.error(error instanceof Error ? error.message : "Failed to change password")
     } finally {
       setIsSubmitting(false)
     }
