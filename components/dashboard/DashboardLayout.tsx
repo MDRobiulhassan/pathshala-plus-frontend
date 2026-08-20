@@ -40,6 +40,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const pathname = usePathname();
     const title = getPageTitle(pathname);
 
+    useEffect(() => {
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, []);
+
     return (
         <div className="flex h-screen min-h-0 bg-[#060910] overflow-hidden">
             {/* Desktop Sidebar */}
@@ -85,7 +94,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     }
                 />
 
-                <div className="flex-1 overflow-y-auto p-4 md:p-8">
+                <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4 md:p-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                     {children}
                 </div>
             </main>

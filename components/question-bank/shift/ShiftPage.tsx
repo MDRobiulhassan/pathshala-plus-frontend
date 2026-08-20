@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import useShifts from "@/hooks/question-bank/useShifts";
+import { useInstitutes } from "@/hooks/question-bank/useInstitutes";
 import ShiftGrid from "./ShiftGrid";
 import BackButton from "@/components/ui/BackButton";
 import Loader from "@/components/ui/Loader";
@@ -22,31 +23,32 @@ export default function ShiftPage() {
         examSessionId
     );
 
+    const { institutes } = useInstitutes();
+    const currentInstitute = institutes.find((i) => i.id === instituteId);
+
     if (loading) {
         return (
             <div className="space-y-6">
-
                 <div>
-                    <h1 className="text-3xl font-bold">
+                    <h1 className="text-3xl font-bold text-white">
                         Shift Questions
                     </h1>
 
-                    <p className="text-muted-foreground">
+                    <p className="text-white/60">
                         See previous questions shift wise
                     </p>
                 </div>
 
-                <div className="rounded-3xl border bg-card p-20 text-center">
+                <div className="rounded-3xl border border-white/10 bg-[#0C1120] p-20 text-center">
                     <Loader />
                 </div>
-
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="rounded-3xl border bg-card p-20 text-center text-red-500">
+            <div className="rounded-3xl border border-white/10 bg-[#0C1120] p-20 text-center text-red-400">
                 {error}
             </div>
         );
@@ -56,11 +58,11 @@ export default function ShiftPage() {
         <div className="space-y-6">
             <BackButton />
             <div>
-                <h1 className="text-3xl font-bold">
-                    Shift Questions
+                <h1 className="text-3xl font-bold text-white">
+                    {currentInstitute ? `${currentInstitute.name} Shifts` : "Shift Questions"}
                 </h1>
 
-                <p className="text-muted-foreground">
+                <p className="text-white/60">
                     See previous questions shift wise
                 </p>
             </div>
@@ -70,8 +72,8 @@ export default function ShiftPage() {
                 instituteId={instituteId}
                 unitId={unitId}
                 examSessionId={examSessionId}
+                logoUrl={currentInstitute?.logoUrl}
             />
-
         </div>
     );
 }

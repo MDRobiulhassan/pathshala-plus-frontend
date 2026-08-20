@@ -92,7 +92,7 @@ function BrandColumn() {
               className="object-contain"
             />
           </div>
-          1-088-Odyssey
+          +880-1568-341706
         </li>
 
         <li className="flex items-center gap-3">
