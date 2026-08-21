@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Passage } from "@/lib/api";
 import SubjectQuestionCard from "./SubjectQuestionCard";
 import { BookOpen } from "lucide-react";
@@ -33,15 +34,19 @@ export default function SubjectQuestionSection({
                                     <BookOpen size={14} />
                                     <span>Read the passage and answer {rangeLabel}</span>
                                 </div>
-                                <p className="text-sm leading-relaxed text-white/90 font-sans">
+                                <p className="text-xl leading-relaxed text-white/90 font-sans">
                                     {passage.passageText}
                                 </p>
                                 {passage.passageImageUrl && (
-                                    <img
-                                        src={passage.passageImageUrl}
-                                        alt="Passage illustration"
-                                        className="rounded-lg max-h-60 object-contain"
-                                    />
+                                    <div className="relative max-h-60 overflow-hidden rounded-lg">
+                                        <Image
+                                            src={passage.passageImageUrl}
+                                            alt="Passage illustration"
+                                            width={800}
+                                            height={480}
+                                            className="rounded-lg max-h-60 w-auto object-contain"
+                                        />
+                                    </div>
                                 )}
                             </div>
                         )}

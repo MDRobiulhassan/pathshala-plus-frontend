@@ -1,6 +1,6 @@
 "use client";
 
-import { TestAttemptResult } from "@/lib/api/question-bank";
+import { TestAttemptResult } from "@/lib/api/test-attempt";
 import BackButton from "@/components/ui/BackButton";
 import { Loader2 } from "lucide-react";
 

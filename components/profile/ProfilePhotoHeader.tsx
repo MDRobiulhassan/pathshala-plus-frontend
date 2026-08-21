@@ -1,11 +1,13 @@
 "use client"
 
 import { useRef, useState, type ChangeEvent } from "react"
+import Image from "next/image"
 import { Camera } from "lucide-react"
 import { DM_Sans } from "next/font/google"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { uploadAvatar } from "@/lib/api"
+import { compressImageIfNeeded } from "@/lib/image-compressor"
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -38,7 +40,7 @@ export default function ProfilePhotoHeader({
       return
     }
 
-    const maxSizeBytes = 2 * 1024 * 1024 // 2MB
+    const maxSizeBytes = 2 * 1024 * 1024
     if (file.size > maxSizeBytes) {
       toast.error("File size exceeds 2MB limit.")
       if (fileInputRef.current) fileInputRef.current.value = ""
@@ -47,7 +49,8 @@ export default function ProfilePhotoHeader({
 
     try {
       setIsUploading(true)
-      const newUrl = await uploadAvatar(file)
+      const fileToUpload = await compressImageIfNeeded(file)
+      const newUrl = await uploadAvatar(fileToUpload)
       onAvatarUpdated(newUrl)
       toast.success("Profile photo updated successfully")
     } catch (error) {
@@ -77,7 +80,13 @@ export default function ProfilePhotoHeader({
       >
         <div className="w-24 h-24 rounded-full bg-[#14B8A6]/10 border-[0.8px] border-[#14B8A6]/30 flex items-center justify-center overflow-hidden">
           {avatarUrl ? (
-            <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
+            <Image
+              src={avatarUrl}
+              alt={name}
+              width={96}
+              height={96}
+              className="w-full h-full object-cover"
+            />
           ) : (
             <span className={cn(dmSans.className, "text-[#14B8A6] text-[32px] font-[700]")}>
               {name ? name.charAt(0).toUpperCase() : "?"}

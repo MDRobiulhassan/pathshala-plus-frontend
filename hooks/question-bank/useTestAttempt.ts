@@ -6,12 +6,12 @@ import {
     TestAttemptResult,
     createOrResumeTestAttempt,
     getTestAttemptWithQuestions,
-    getExamQuestions,
     saveTestProgress,
     submitTestAttempt,
     getTestAttemptResult,
     SaveAnswerItem,
-} from "@/lib/api/question-bank";
+} from "@/lib/api/test-attempt";
+import { getExamQuestions } from "@/lib/api/question-bank";
 
 export default function useTestAttempt(testId: number, attemptIdFromQuery?: number) {
     const [attemptDetails, setAttemptDetails] = useState<TestAttemptDetails | null>(null);
@@ -26,7 +26,8 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
     const isCompletedRef = useRef(false);
 
     const initTest = useCallback(async (isRetake = false) => {
-        if (!testId && !attemptIdFromQuery) {
+        // Guard: wait for valid positive IDs — searchParams may not be ready on first render
+        if ((!testId || testId <= 0) && (!attemptIdFromQuery || attemptIdFromQuery <= 0)) {
             setLoading(false);
             return;
         }
@@ -40,10 +41,11 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
             setError("");
 
             let targetAttemptId: number;
+            let details: TestAttemptDetails;
 
             if (attemptIdFromQuery && !isRetake) {
                 targetAttemptId = attemptIdFromQuery;
-                const details = await getTestAttemptWithQuestions(targetAttemptId);
+                details = await getTestAttemptWithQuestions(targetAttemptId);
                 setAttemptDetails(details);
 
                 try {
@@ -57,7 +59,7 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
             } else {
                 const init = await createOrResumeTestAttempt(testId);
                 targetAttemptId = init.attemptId;
-                const details = await getTestAttemptWithQuestions(targetAttemptId);
+                details = await getTestAttemptWithQuestions(targetAttemptId);
 
                 if (details.testInfo && !details.testInfo.startedAt && init.startedAt) {
                     details.testInfo.startedAt = init.startedAt;
@@ -77,59 +79,63 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
                 }
             }
 
-            if (attemptDetails?.testInfo?.examInfoId || (attemptIdFromQuery && attemptDetails?.testInfo?.examInfoId)) {
-                const examInfoId = attemptDetails?.testInfo?.examInfoId;
-                if (examInfoId) {
-                    try {
-                        const examQData = await getExamQuestions(examInfoId);
-                        if (examQData?.subjects) {
-                            const qMetaMap = new Map<
-                                number,
-                                { explanation: string | null; correctOptionIds: Set<number> }
-                            >();
+            // Use local `details` (not stale `attemptDetails` state) for all post-fetch work
+            if (details.testInfo?.examInfoId) {
+                const examInfoId = details.testInfo.examInfoId;
+                try {
+                    const examQData = await getExamQuestions(examInfoId);
+                    if (examQData?.subjects) {
+                        const qMetaMap = new Map<
+                            number,
+                            { explanation: string | null; correctOptionIds: Set<number> }
+                        >();
 
-                            examQData.subjects.forEach((s) => {
-                                s.chapters?.forEach((c) => {
-                                    c.passages?.forEach((p) => {
-                                        p.questions?.forEach((q) => {
-                                            const correctSet = new Set<number>();
-                                            q.options?.forEach((o) => {
-                                                if (o.isCorrect) {
-                                                    correctSet.add(o.optionId);
-                                                }
-                                            });
-                                            qMetaMap.set(q.questionId, {
-                                                explanation: q.explanation ?? null,
-                                                correctOptionIds: correctSet,
-                                            });
-                                        });
-                                    });
-                                });
-                            });
-
-                            attemptDetails.subjects?.forEach((s) => {
-                                s.chapters?.forEach((c) => {
-                                    c.passages?.forEach((p) => {
-                                        p.questions?.forEach((q) => {
-                                            const meta = qMetaMap.get(q.questionId);
-                                            if (meta) {
-                                                q.explanation = meta.explanation;
-                                                q.options?.forEach((o) => {
-                                                    o.isCorrect = meta.correctOptionIds.has(o.optionId);
-                                                });
+                        examQData.subjects.forEach((s) => {
+                            s.chapters?.forEach((c) => {
+                                c.passages?.forEach((p) => {
+                                    p.questions?.forEach((q) => {
+                                        const correctSet = new Set<number>();
+                                        q.options?.forEach((o) => {
+                                            if (o.isCorrect) {
+                                                correctSet.add(o.optionId);
                                             }
                                         });
+                                        qMetaMap.set(q.questionId, {
+                                            explanation: q.explanation ?? null,
+                                            correctOptionIds: correctSet,
+                                        });
                                     });
                                 });
                             });
-                        }
-                    } catch (e) {
+                        });
+
+                        details.subjects?.forEach((s) => {
+                            s.chapters?.forEach((c) => {
+                                c.passages?.forEach((p) => {
+                                    p.questions?.forEach((q) => {
+                                        const meta = qMetaMap.get(q.questionId);
+                                        if (meta) {
+                                            q.explanation = meta.explanation;
+                                            q.options?.forEach((o) => {
+                                                o.isCorrect = meta.correctOptionIds.has(o.optionId);
+                                            });
+                                        }
+                                    });
+                                });
+                            });
+                        });
+
+                        // Push the enriched details back into state
+                        setAttemptDetails({ ...details });
                     }
+                } catch (e) {
                 }
             }
-            if (attemptDetails?.subjects) {
+
+            // Pre-populate answers from already-selected options
+            if (details.subjects) {
                 const preSelected: Record<number, number> = {};
-                attemptDetails.subjects.forEach((subject) => {
+                details.subjects.forEach((subject) => {
                     subject.chapters?.forEach((chapter) => {
                         chapter.passages?.forEach((passage) => {
                             passage.questions?.forEach((q) => {
@@ -151,8 +157,14 @@ export default function useTestAttempt(testId: number, attemptIdFromQuery?: numb
         }
     }, [testId, attemptIdFromQuery]);
 
+
     useEffect(() => {
-        initTest();
+        // Only run once we have a real testId or attemptId — avoids firing with 0 during hydration
+        if ((testId && testId > 0) || (attemptIdFromQuery && attemptIdFromQuery > 0)) {
+            initTest();
+        } else {
+            setLoading(false);
+        }
     }, [testId, attemptIdFromQuery, initTest]);
     const selectOption = useCallback((questionId: number, optionId: number) => {
         if (isCompletedRef.current) return;

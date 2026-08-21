@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import OptionButton from "../Shared/OptionButton";
 import ExplanationBox from "../Shared/ExplanationBox";
 
@@ -46,11 +47,15 @@ export default function TestQuestionCard({
                 </h2>
 
                 {question.questionImageUrl && (
-                    <img
-                        src={question.questionImageUrl}
-                        alt=""
-                        className="rounded-lg max-h-64 object-contain"
-                    />
+                    <div className="relative max-h-64 overflow-hidden rounded-lg">
+                        <Image
+                            src={question.questionImageUrl}
+                            alt="Question diagram"
+                            width={600}
+                            height={400}
+                            className="rounded-lg max-h-64 w-auto object-contain"
+                        />
+                    </div>
                 )}
             </div>
 
@@ -72,6 +77,17 @@ export default function TestQuestionCard({
                             <div key={option.optionId} className={className}>
                                 <span className="mr-2 font-bold">{option.optionLabel}.</span>
                                 {option.optionText}
+                                {option.optionImageUrl && (
+                                    <div className="mt-2 relative max-h-40 overflow-hidden rounded-lg">
+                                        <Image
+                                            src={option.optionImageUrl}
+                                            alt={`Option ${option.optionLabel}`}
+                                            width={400}
+                                            height={200}
+                                            className="rounded-lg max-h-40 w-auto object-contain"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         );
                     }
@@ -81,6 +97,7 @@ export default function TestQuestionCard({
                             key={option.optionId}
                             label={option.optionLabel}
                             text={option.optionText}
+                            imageUrl={option.optionImageUrl}
                             selected={selectedOptionId === option.optionId}
                             onClick={() => onSelect?.(question.questionId, option.optionId)}
                         />

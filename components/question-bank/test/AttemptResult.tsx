@@ -1,6 +1,6 @@
 "use client";
 
-import { TestAttemptResult, TestResultQuestion } from "@/lib/api/question-bank";
+import { TestAttemptResult, TestResultQuestion } from "@/lib/api/test-attempt";
 import Link from "next/link";
 import { CheckCircle2, XCircle, Minus, ArrowLeft, Trophy } from "lucide-react";
 import ExplanationBox from "../Shared/ExplanationBox";

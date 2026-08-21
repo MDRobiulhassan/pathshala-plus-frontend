@@ -1,6 +1,6 @@
 "use client";
 
-import { TestAttemptQuestion } from "@/lib/api/question-bank";
+import { TestAttemptQuestion } from "@/lib/api/test-attempt";
 import Image from "next/image";
 
 type Props = {
@@ -29,11 +29,15 @@ export default function AttemptQuestionCard({
                     {question.questionText}
                 </h2>
                 {question.questionImageUrl && (
-                    <img
-                        src={question.questionImageUrl}
-                        alt="Question image"
-                        className="rounded-xl max-h-64 object-contain"
-                    />
+                    <div className="relative max-h-64 overflow-hidden rounded-xl">
+                        <Image
+                            src={question.questionImageUrl}
+                            alt="Question diagram"
+                            width={600}
+                            height={400}
+                            className="rounded-xl max-h-64 w-auto object-contain"
+                        />
+                    </div>
                 )}
             </div>
 
@@ -70,7 +74,20 @@ export default function AttemptQuestionCard({
                             }`}>
                                 {option.optionLabel}.
                             </span>
-                            <span className="text-sm leading-relaxed">{option.optionText}</span>
+                            <div className="flex flex-col gap-2">
+                                <span className="text-sm leading-relaxed">{option.optionText}</span>
+                                {option.optionImageUrl && (
+                                    <div className="relative max-h-40 overflow-hidden rounded-lg">
+                                        <Image
+                                            src={option.optionImageUrl}
+                                            alt={`Option ${option.optionLabel}`}
+                                            width={400}
+                                            height={200}
+                                            className="rounded-lg max-h-40 w-auto object-contain"
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </button>
                     );
                 })}

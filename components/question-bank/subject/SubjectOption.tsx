@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { QuestionOption } from "@/lib/api";
 
 type Props = {
@@ -30,6 +31,7 @@ export default function SubjectOption({
                     flex
                     h-10
                     w-10
+                    shrink-0
                     items-center
                     justify-center
                     rounded-full
@@ -44,8 +46,21 @@ export default function SubjectOption({
                 {option.optionLabel}
             </div>
 
-            <div className="flex-1">
-                {option.optionText}
+            <div className="flex-1 flex flex-col gap-2">
+                {option.optionText && (
+                    <span>{option.optionText}</span>
+                )}
+                {option.optionImageUrl && (
+                    <div className="relative max-h-40 overflow-hidden rounded-lg">
+                        <Image
+                            src={option.optionImageUrl}
+                            alt={`Option ${option.optionLabel}`}
+                            width={400}
+                            height={200}
+                            className="rounded-lg max-h-40 w-auto object-contain"
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

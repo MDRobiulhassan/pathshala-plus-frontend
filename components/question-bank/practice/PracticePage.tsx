@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -152,11 +153,15 @@ export default function PracticePage() {
                                                         {passage.passageText}
                                                     </p>
                                                     {passage.passageImageUrl && (
-                                                        <img
-                                                            src={passage.passageImageUrl}
-                                                            alt="Passage illustration"
-                                                            className="rounded-lg max-h-60 object-contain"
-                                                        />
+                                                        <div className="relative max-h-60 overflow-hidden rounded-lg">
+                                                            <Image
+                                                                src={passage.passageImageUrl}
+                                                                alt="Passage illustration"
+                                                                width={800}
+                                                                height={480}
+                                                                className="rounded-lg max-h-60 w-auto object-contain"
+                                                            />
+                                                        </div>
                                                     )}
                                                 </div>
                                             )}
