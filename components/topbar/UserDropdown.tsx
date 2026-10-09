@@ -35,10 +35,10 @@ export default function UserDropdown() {
     async function logout() {
         try {
             await logoutUser();
-        } catch {
+        } catch (error) {
         } finally {
             queryClient.removeQueries({ queryKey: AUTH_SESSION_QUERY_KEY });
-            router.push("/auth/login");
+            // router.replace("/auth/login");
         }
     }
 

@@ -15,10 +15,10 @@ export function SiteNav() {
   const handleLogout = async () => {
     try {
       await logoutUser();
-    } catch {
+    } catch (error) {
     } finally {
       queryClient.removeQueries({ queryKey: AUTH_SESSION_QUERY_KEY });
-      router.push("/");
+      router.replace("/");
     }
   };
 
