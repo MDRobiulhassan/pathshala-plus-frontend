@@ -9,8 +9,10 @@ import {
 } from "lucide-react";
 
 import { motion, useReducedMotion } from "motion/react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 type Stat = {
   value: string;
@@ -81,6 +83,19 @@ export function HeroSection() {
 
 function HeroCopy() {
   const reduce = useReducedMotion();
+  const { isAuthenticated, userRole } = useAuthSession();
+
+  const practicePath = isAuthenticated
+    ? userRole === "TEACHER"
+      ? "/teacher"
+      : "/student/question-bank"
+    : "/auth/signup";
+
+  // Free trial — guest users can access the question bank landing to start
+  // a practice session; the middleware only guards /student/:path*, so guests
+  // hitting the question bank page will be redirected to login automatically.
+  // For a frictionless "Try it" CTA we point straight to the question bank.
+  const freeTrial = "/student/question-bank";
 
   const fade = (delay: number) => ({
     initial: { opacity: 0, y: reduce ? 0 : 18 },
@@ -140,6 +155,7 @@ function HeroCopy() {
       >
         <Button
           size="lg"
+          asChild
           className="
             h-14
             rounded-full
@@ -151,13 +167,16 @@ function HeroCopy() {
             hover:bg-[#00c4b8]
           "
         >
-          Start Practicing
-          <ArrowRight className="ml-1 size-5" />
+          <Link href={practicePath}>
+            Start Practicing
+            <ArrowRight className="ml-1 size-5" />
+          </Link>
         </Button>
 
         <Button
           size="lg"
           variant="outline"
+          asChild
           className="
             h-14
             rounded-full
@@ -169,7 +188,9 @@ function HeroCopy() {
             hover:bg-white/5
           "
         >
-          Take a Free Test
+          <Link href={freeTrial}>
+            Take a Free Test
+          </Link>
         </Button>
       </motion.div>
 

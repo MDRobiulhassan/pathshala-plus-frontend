@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import {
@@ -6,12 +9,15 @@ import {
   Stagger,
   StaggerItem,
 } from "@/components/homepage/reveal";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 type QuickAction = {
   iconPath: string;
   title: string;
   description: string;
   cta: string;
+  href: string;
+  authHref?: string;
 };
 
 const actions: QuickAction[] = [
@@ -21,6 +27,8 @@ const actions: QuickAction[] = [
     description:
       "Filter questions by your university and practice MCQs.",
     cta: "Explore",
+    href: "/auth/signup",
+    authHref: "/student/question-bank",
   },
   {
     iconPath: "/icons/exam-time.png",
@@ -28,6 +36,8 @@ const actions: QuickAction[] = [
     description:
       "Simulate real exam conditions with full-length timed tests.",
     cta: "Start Test",
+    href: "/auth/signup",
+    authHref: "/student/tests",
   },
   {
     iconPath: "/icons/data-analytics.png",
@@ -35,6 +45,8 @@ const actions: QuickAction[] = [
     description:
       "Track your accuracy, time per question, and improvement.",
     cta: "View Stats",
+    href: "/auth/signup",
+    authHref: "/student",
   },
   {
     iconPath: "/icons/competition.png",
@@ -42,10 +54,14 @@ const actions: QuickAction[] = [
     description:
       "Challenge a friend to a live head-to-head quiz battle.",
     cta: "Find Match",
+    href: "/auth/signup",
+    authHref: "/student/duel",
   },
 ];
 
 export function QuickActions() {
+  const { isAuthenticated } = useAuthSession();
+
   return (
     <section
       aria-labelledby="quick-actions-heading"
@@ -119,7 +135,7 @@ export function QuickActions() {
                 lg:min-h-[16rem]
               "
             >
-              <ActionBody {...a} />
+              <ActionBody {...a} isAuthenticated={isAuthenticated} />
             </StaggerItem>
           ))}
         </Stagger>
@@ -133,7 +149,12 @@ function ActionBody({
   title,
   description,
   cta,
-}: QuickAction) {
+  href,
+  authHref,
+  isAuthenticated,
+}: QuickAction & { isAuthenticated: boolean }) {
+  const destination = isAuthenticated && authHref ? authHref : href;
+
   return (
     <>
       <div className="flex items-center gap-4">
@@ -181,8 +202,8 @@ function ActionBody({
         {description}
       </p>
 
-      <button
-        type="button"
+      <Link
+        href={destination}
         className="
           group
           mt-7
@@ -213,7 +234,7 @@ function ActionBody({
             group-hover:translate-x-0.5
           "
         />
-      </button>
+      </Link>
     </>
   );
 }

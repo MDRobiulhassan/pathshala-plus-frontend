@@ -1,9 +1,13 @@
+"use client";
+
 import {
   Check,
   Flame,
 } from "lucide-react";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 import {
   Reveal,
@@ -18,6 +22,8 @@ type Plan = {
   features: string[];
   cta: string;
   featured?: boolean;
+  href: string;
+  authHref: string;
 };
 
 const plans: Plan[] = [
@@ -33,6 +39,8 @@ const plans: Plan[] = [
       "Duel mode (2 per day)",
     ],
     cta: "Get Started",
+    href: "/auth/signup",
+    authHref: "/student",
   },
   {
     name: "Pro",
@@ -48,6 +56,8 @@ const plans: Plan[] = [
       "Custom test creation",
     ],
     cta: "Upgrade to Pro",
+    href: "/auth/signup",
+    authHref: "/student",
     featured: true,
   },
   {
@@ -64,14 +74,20 @@ const plans: Plan[] = [
       "Dedicated support channel",
     ],
     cta: "Start Teaching",
+    href: "/auth/signup",
+    authHref: "/teacher",
   },
 ];
 
 export function Pricing() {
+  const { isAuthenticated, userRole } = useAuthSession();
+  const defaultAuthHref = userRole === "TEACHER" ? "/teacher" : "/student";
+
   return (
     <section
+      id="pricing"
       aria-labelledby="pricing-heading"
-      className="bg-[#060910]"
+      className="bg-[#060910] scroll-mt-6"
     >
       <div className="mx-auto w-full max-w-[82rem] px-6 py-24">
         
@@ -161,7 +177,10 @@ export function Pricing() {
                 }
               `}
             >
-              <PlanBody {...p} />
+              <PlanBody
+                {...p}
+                resolvedAuthHref={isAuthenticated ? (p.authHref ?? defaultAuthHref) : p.href}
+              />
             </StaggerItem>
           ))}
         </Stagger>
@@ -177,7 +196,8 @@ function PlanBody({
   features,
   cta,
   featured,
-}: Plan) {
+  resolvedAuthHref,
+}: Plan & { resolvedAuthHref: string }) {
   return (
     <>
       {/* POPULAR TAG */}
@@ -316,6 +336,7 @@ function PlanBody({
       <Button
         size="lg"
         variant={featured ? "default" : "outline"}
+        asChild
         className={`
           mt-10
           h-14
@@ -339,7 +360,9 @@ function PlanBody({
           }
         `}
       >
-        {cta}
+        <Link href={resolvedAuthHref}>
+          {cta}
+        </Link>
       </Button>
     </>
   );

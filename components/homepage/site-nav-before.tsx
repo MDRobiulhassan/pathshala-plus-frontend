@@ -3,40 +3,65 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 const links = [
   { label: "Home", to: "/" },
-  { label: "Batch", to: "/" },
-  { label: "Duel", to: "/" },
-  { label: "Pricing", to: "/" },
+  { label: "Batch", to: "/#features" },
+  { label: "Duel", to: "/#features" },
+  { label: "Pricing", to: "/#pricing" },
 ] as const;
 
 export function SiteNavBeforeLogin() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+
+
+  function handleNavClick(
+    e: React.MouseEvent<HTMLAnchorElement>,
+    to: string,
+    onClose?: () => void,
+  ) {
+    onClose?.();
+    if (!to.startsWith("/#")) return; 
+    const hash = to.slice(1); 
+    if (pathname === "/") {
+      e.preventDefault();
+      const target = document.querySelector(hash);
+      target?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+     
+      e.preventDefault();
+      router.push(to);
+    }
+  }
 
   return (
     <header className="relative z-50 w-full px-6 pt-6">
-      <div className="mx-auto flex max-w-7xl items-center justify-between">
+      <div className="mx-auto flex max-w-7xl items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr]">
         
         {/* LEFT LOGO */}
-        <Link
-          href="/"
-          aria-label="Home"
-          className="flex h-[52px] w-[52px] shrink-0 items-center justify-center"
-        >
-          <Image
-            src="/icons/Icon.png"
-            alt="Pathshala Logo"
-            width={42}
-            height={42}
-            className="object-contain"
-            priority
-          />
-        </Link>
+        <div className="flex items-center justify-start">
+          <Link
+            href="/"
+            aria-label="Home"
+            className="flex h-[52px] w-[52px] shrink-0 items-center justify-center"
+          >
+            <Image
+              src="/icons/Icon.png"
+              alt="Pathshala Logo"
+              width={42}
+              height={42}
+              className="object-contain"
+              priority
+            />
+          </Link>
+        </div>
 
         {/* CENTER NAV */}
-        <nav aria-label="Primary" className="hidden md:flex">
+        <nav aria-label="Primary" className="hidden md:flex items-center justify-center">
           <div
             className="
               flex
@@ -55,9 +80,12 @@ export function SiteNavBeforeLogin() {
               <Link
                 key={l.label}
                 href={l.to}
+                onClick={(e) => handleNavClick(e, l.to)}
                 className="
                   rounded-[0.8rem]
-                  px-10
+                  px-5
+                  lg:px-8
+                  xl:px-10
                   py-3
                   text-[1rem]
                   font-[700]
@@ -79,7 +107,7 @@ export function SiteNavBeforeLogin() {
         </nav>
 
         {/* RIGHT CONTROLS */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-end gap-3">
           <div className="hidden md:flex items-center gap-3">
             <Link
               href="/auth/login"
@@ -176,7 +204,7 @@ export function SiteNavBeforeLogin() {
               <Link
                 key={l.label}
                 href={l.to}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={(e) => handleNavClick(e, l.to, () => setMobileMenuOpen(false))}
                 className="
                   w-full
                   rounded-xl
