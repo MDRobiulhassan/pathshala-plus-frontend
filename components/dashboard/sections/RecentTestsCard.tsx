@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AllAttemptsModal from "./AllAttemptsModal";
 import { ArrowRight, Eye, Play } from "lucide-react";
@@ -18,6 +18,8 @@ type Props = {
     recentTests: RecentTest[];
 };
 
+
+
 export default function RecentTestsCard({
     recentTests,
 }: Props) {
@@ -25,7 +27,36 @@ export default function RecentTestsCard({
     const [showAllAttemptsModal, setShowAllAttemptsModal] = useState(false);
 
     const displayedTests = recentTests.slice(0, 5);
+    useEffect(() => {
+        if (!showAllAttemptsModal) return;
 
+        const modalState = {
+            ...window.history.state,
+            allAttemptsModal: true,
+        };
+
+        window.history.pushState(
+            modalState,
+            "",
+            window.location.href
+        );
+
+        const handlePopState = () => {
+            setShowAllAttemptsModal(false);
+        };
+
+        window.addEventListener("popstate", handlePopState);
+
+        return () => {
+            window.removeEventListener("popstate", handlePopState);
+
+            // If the modal closes via its cross button, remove its
+            // temporary history entry without navigating away.
+            if (window.history.state?.allAttemptsModal) {
+                window.history.back();
+            }
+        };
+    }, [showAllAttemptsModal]);
     const handleNavigate = (testId: number, attemptId: number) => {
         router.push(`/student/question-bank/exam-info/${testId}/test?testId=${testId}&attemptId=${attemptId}`);
     };
@@ -115,13 +146,12 @@ export default function RecentTestsCard({
                                     )}
 
                                     <span
-                                        className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                                            isInProgress
-                                                ? "bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse"
-                                                : test.passed
-                                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                                    : "bg-red-500/10 text-red-400 border border-red-500/20"
-                                        }`}
+                                        className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${isInProgress
+                                            ? "bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse"
+                                            : test.passed
+                                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                                : "bg-red-500/10 text-red-400 border border-red-500/20"
+                                            }`}
                                     >
                                         {isInProgress ? "In Progress" : test.passed ? "Passed" : "Failed"}
                                     </span>

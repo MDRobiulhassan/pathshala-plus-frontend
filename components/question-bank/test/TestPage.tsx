@@ -17,7 +17,11 @@ export default function TestPage() {
     const testId = Number(searchParams.get("testId") ?? 0);
     const attemptId = Number(searchParams.get("attemptId") ?? 0);
     const [reviewMode, setReviewMode] = useState(false);
-
+    const [showCorrectAnswersOnly, setShowCorrectAnswersOnly] = useState(false);
+    const handleViewCorrectAnswers = () => {
+        setShowCorrectAnswersOnly(true);
+        setReviewMode(true);
+    };
     const {
         attemptDetails,
         answers,
@@ -36,6 +40,20 @@ export default function TestPage() {
             <div className="flex h-96 items-center justify-center">
                 <Loader />
             </div>
+        );
+    }
+    if (result && !reviewMode) {
+        return (
+            <TestResult
+                result={result}
+                onViewAnswers={() => {
+                    setShowCorrectAnswersOnly(false);
+                    setReviewMode(true);
+                }}
+                onViewCorrectAnswers={handleViewCorrectAnswers}
+                onRetake={retake}
+                retaking={retaking}
+            />
         );
     }
 
@@ -61,6 +79,8 @@ export default function TestPage() {
             <TestResult
                 result={result}
                 onViewAnswers={() => setReviewMode(true)}
+                onViewCorrectAnswers={handleViewCorrectAnswers}
+
                 onRetake={retake}
                 retaking={retaking}
             />
@@ -75,8 +95,44 @@ export default function TestPage() {
     const totalMarks = testInfo?.totalMarks || 100;
     const negativeMark = testInfo?.negativeMarksPerQuestion || 25;
 
-    const displaySubjects: any[] = reviewMode && result ? result.subjects as any : subjects;
+    const displaySubjects: any[] = reviewMode && result
+        ? (result.subjects as any[])
+            .map((subject: any) => ({
+                ...subject,
+                chapters: subject.chapters
+                    ?.map((chapter: any) => ({
+                        ...chapter,
+                        passages: chapter.passages
+                            ?.map((passage: any) => ({
+                                ...passage,
+                                questions: passage.questions?.filter(
+                                    (question: any) => {
+                                        if (!showCorrectAnswersOnly) return true;
 
+                                        // Include the question if the student
+                                        // selected any answer, right or wrong.
+                                        return question.options?.some(
+                                            (option: any) => option.selected
+                                        );
+                                    }
+                                ),
+                            }))
+                            // Remove passages without submitted questions
+                            .filter(
+                                (passage: any) =>
+                                    passage.questions?.length > 0
+                            ),
+                    }))
+                    .filter(
+                        (chapter: any) =>
+                            chapter.passages?.length > 0
+                    ),
+            }))
+            .filter(
+                (subject: any) =>
+                    subject.chapters?.length > 0
+            )
+        : subjects;
     let globalQuestionNum = 0;
     const answeredCount = Object.keys(answers).length;
     const totalQuestions = testInfo?.totalQuestions ?? 0;
@@ -86,13 +142,19 @@ export default function TestPage() {
             {reviewMode ? (
                 <div className="flex items-center justify-between">
                     <button
-                        onClick={() => setReviewMode(false)}
+                        onClick={() => {
+                            setShowCorrectAnswersOnly(false);
+
+                            setReviewMode(false)
+                        }}
+
                         className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium hover:bg-white/10 transition-colors cursor-pointer"
                     >
                         ← Back to Test Result
                     </button>
-                    <span className="text-xl font-bold">Answer Review</span>
-                </div>
+                    <span className="text-xl font-bold">
+                        {showCorrectAnswersOnly ? "Submitted Answers Only" : "Answer Review"}
+                    </span>                </div>
             ) : (
                 <TestHeader
                     title={testInfo?.testName || testInfo?.examType}
