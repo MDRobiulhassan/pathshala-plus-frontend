@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ArrowRight,
   GraduationCap,
@@ -5,7 +7,9 @@ import {
   FlaskConical,
 } from "lucide-react";
 
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 import {
   Reveal,
@@ -198,6 +202,13 @@ function AudienceBody({
 }
 
 function CtaCard() {
+  const { isAuthenticated, userRole } = useAuthSession();
+  const destination = isAuthenticated
+    ? userRole === "TEACHER"
+      ? "/teacher"
+      : "/student/question-bank"
+    : "/auth/signup";
+
   return (
     <aside
       aria-label="Call to action"
@@ -288,6 +299,7 @@ function CtaCard() {
         {/* BUTTON */}
         <Button
           size="lg"
+          asChild
           className="
             mt-8
             h-14
@@ -300,12 +312,14 @@ function CtaCard() {
             hover:bg-[#00c4b8]
           "
         >
-          Start Practicing Now
+          <Link href={destination}>
+            Start Practicing Now
 
-          <ArrowRight
-            aria-hidden="true"
-            className="ml-1 size-5"
-          />
+            <ArrowRight
+              aria-hidden="true"
+              className="ml-1 size-5"
+            />
+          </Link>
         </Button>
       </div>
     </aside>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, LogOut, LayoutDashboard } from "lucide-react";
 import UserDropdown from "@/components/topbar/UserDropdown";
 
@@ -13,14 +14,36 @@ type Props = {
 
 export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
 
   const dashboardPath = userRole === "TEACHER" ? "/teacher" : "/student";
 
+  function handleNavClick(
+    e: React.MouseEvent<HTMLAnchorElement>,
+    to: string,
+    onClose?: () => void,
+  ) {
+    onClose?.();
+    if (!to.startsWith("/#")) return;
+    const hash = to.slice(1);
+    if (pathname === "/") {
+      e.preventDefault();
+      document.querySelector(hash)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      e.preventDefault();
+      router.push(to);
+    }
+  }
+
+  const batchPath = userRole === "TEACHER" ? "/teacher/batch" : "/student/batch";
+  const duelPath = "/student/duel";
+
   const links = [
     { label: "Home", to: "/" },
-    { label: "Batch", to: "/" },
-    { label: "Duel", to: "/" },
-    { label: "Pricing", to: "/" },
+    { label: "Batch", to: batchPath },
+    { label: "Duel", to: duelPath },
+    { label: "Pricing", to: "/#pricing" },
   ] as const;
 
   return (
@@ -63,9 +86,12 @@ export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
               <Link
                 key={l.label}
                 href={l.to}
+                onClick={(e) => handleNavClick(e, l.to)}
                 className="
                   rounded-[0.8rem]
-                  px-10
+                  px-5
+                  lg:px-8
+                  xl:px-10
                   py-3
                   text-[1rem]
                   font-[700]
@@ -86,11 +112,11 @@ export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
           </div>
         </nav>
 
-        {/* RIGHT CONTROLS */}
-        <div className="flex items-center gap-3">
+
+        <div className="flex items-center justify-end gap-3">
           <UserDropdown />
 
-          {/* MOBILE MENU TRIGGER */}
+
           <button
             type="button"
             aria-label="Toggle navigation menu"
@@ -123,7 +149,7 @@ export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
         </div>
       </div>
 
-      {/* MOBILE DROPDOWN NAVIGATION */}
+
       {mobileMenuOpen && (
         <div
           className="
@@ -152,7 +178,7 @@ export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
               <Link
                 key={l.label}
                 href={l.to}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={(e) => handleNavClick(e, l.to, () => setMobileMenuOpen(false))}
                 className="
                   w-full
                   rounded-xl

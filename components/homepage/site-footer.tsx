@@ -1,35 +1,50 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 import { FaInstagram } from "react-icons/fa";
+import { useAuthSession } from "@/hooks/useAuthSession";
+
+type FooterLink = {
+  label: string;
+  publicHref: string;
+  studentHref?: string;
+  teacherHref?: string;
+};
 
 type LinkColumn = {
   title: string;
-  links: string[];
+  links: FooterLink[];
 };
 
 const columns: LinkColumn[] = [
   {
     title: "Explore",
-    links: ["Home", "Batch", "Duel 1v1", "Pricing"],
+    links: [
+      { label: "Home", publicHref: "/", studentHref: "/student", teacherHref: "/teacher" },
+      { label: "Batch", publicHref: "/#features", studentHref: "/student/batch", teacherHref: "/teacher/batch" },
+      { label: "Duel 1v1", publicHref: "/#features", studentHref: "/student/duel" },
+      { label: "Pricing", publicHref: "/#pricing" },
+    ],
   },
   {
     title: "Features",
     links: [
-      "Practice Tests",
-      "Mock Exams",
-      "AI Explanations",
-      "FAQ",
+      { label: "Practice Tests", publicHref: "/#features", studentHref: "/student/question-bank" },
+      { label: "Mock Exams", publicHref: "/#features", studentHref: "/student/tests" },
+      { label: "AI Explanations", publicHref: "/#features", studentHref: "/student/ai" },
+      { label: "FAQ", publicHref: "/#faq" },
     ],
   },
   {
     title: "Company",
     links: [
-      "About us",
-      "Contact",
-      "Privacy Policy",
-      "Terms & Conditions",
+      { label: "About us", publicHref: "/#about" },
+      { label: "Contact", publicHref: "/#contact" },
+      { label: "Privacy Policy", publicHref: "/privacy-policy" },
+      { label: "Terms & Conditions", publicHref: "/terms" },
     ],
   },
 ];
@@ -38,15 +53,18 @@ const socials = [
   {
     iconPath: "/icons/facebook.png",
     label: "Facebook",
+    href: "https://facebook.com",
   },
   {
     icon: FaInstagram,
     label: "Instagram",
     color: "text-[#e1306c]",
+    href: "https://instagram.com",
   },
   {
     iconPath: "/icons/linkedin.png",
     label: "LinkedIn",
+    href: "https://linkedin.com",
   },
 ];
 
@@ -61,7 +79,7 @@ export function SiteFooter() {
 
         <div className="flex flex-col items-start justify-between gap-3 border-t border-white/[0.06] px-8 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center">
           <p>© Odyssey. All rights Reserved</p>
-          <p>Practice, test & improve</p>
+          <p>Practice, test &amp; improve</p>
         </div>
       </div>
     </footer>
@@ -118,6 +136,32 @@ function BrandColumn() {
 }
 
 function LinkGrid() {
+  const { isAuthenticated, userRole } = useAuthSession();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  function resolveHref(link: FooterLink): string {
+    if (!isAuthenticated) return link.publicHref;
+    if (userRole === "TEACHER" && link.teacherHref) return link.teacherHref;
+    if (link.studentHref) return link.studentHref;
+    return link.publicHref;
+  }
+
+  function handleClick(
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) {
+    if (!href.startsWith("/#")) return;
+    const hash = href.slice(1);
+    if (pathname === "/") {
+      e.preventDefault();
+      document.querySelector(hash)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      e.preventDefault();
+      router.push(href);
+    }
+  }
+
   return (
     <div className="bg-[#08101F] px-8 py-10 lg:px-10">
       <div className="grid grid-cols-2 gap-10 sm:grid-cols-3">
@@ -129,13 +173,14 @@ function LinkGrid() {
 
             <ul className="mt-5 space-y-3 text-sm text-white/60">
               {column.links.map((link) => (
-                <li key={link}>
-                  <a
-                    href="#"
+                <li key={link.label}>
+                  <Link
+                    href={resolveHref(link)}
+                    onClick={(e) => handleClick(e, resolveHref(link))}
                     className="transition-colors duration-200 hover:text-cyan-400"
                   >
-                    {link}
-                  </a>
+                    {link.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -152,7 +197,9 @@ function LinkGrid() {
           {socials.map((social) => (
             <li key={social.label}>
               <a
-                href="#"
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label={social.label}
                 className="flex size-9 items-center justify-center rounded-full bg-white/95 transition-all duration-200 hover:scale-105 hover:bg-white overflow-hidden"
               >
