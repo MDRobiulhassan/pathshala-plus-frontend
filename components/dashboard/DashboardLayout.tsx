@@ -46,6 +46,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         };
     }, []);
 
+    useEffect(()=> {
+        setMobileOpen(false);
+    }, [pathname]);
+
     return (
         <div className="flex h-screen min-h-0 bg-[#060910] overflow-hidden">
             {/* Desktop Sidebar */}
