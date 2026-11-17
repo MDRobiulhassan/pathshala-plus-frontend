@@ -63,7 +63,7 @@ api.interceptors.response.use(
           protectedRoutes.some((route) => window.location.pathname.startsWith(route));
 
         if (isCurrentRouteProtected) {
-          window.location.href = "/auth/login";
+          window.location.replace("/auth/login");
         }
         return Promise.reject(refreshError);
       } finally {
