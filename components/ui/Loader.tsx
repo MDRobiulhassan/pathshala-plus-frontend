@@ -9,7 +9,7 @@ export default function Loader() {
                 <div className="absolute h-20 w-20 animate-spin rounded-full border-4 border-muted border-t-primary" />
 
                 <Image
-                    src="/icons/icon.png"
+                    src="/icons/Icon.png"
                     alt="Loading"
                     width={48}
                     height={48}

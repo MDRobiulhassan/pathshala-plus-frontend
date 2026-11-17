@@ -142,3 +142,172 @@
     cursor: pointer;
   }
 }
+
+/* Light Theme Mode */
+html.light {
+  color-scheme: light;
+  --background: oklch(0.99 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --muted: oklch(0.96 0.01 260);
+  --muted-foreground: oklch(0.45 0.02 260);
+  --border: oklch(0.9 0.01 260);
+  --input: oklch(0.88 0.01 260);
+}
+
+html.light body {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+/* Layout containers */
+html.light .bg-\[\#060910\] {
+  background-color: #F8FAFC !important;
+}
+
+html.light .bg-\[\#0A0F1E\] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+}
+
+html.light .bg-\[\#0C1120\] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Headers & dropdowns */
+html.light header.bg-\[\#060910\] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+}
+
+/* Text colors */
+html.light .text-white {
+  color: #0F172A !important;
+}
+
+html.light .text-white\/70,
+html.light .text-white\/60 {
+  color: #334155 !important;
+}
+
+html.light .text-white\/50 {
+  color: #475569 !important;
+}
+
+html.light .text-white\/40,
+html.light .text-white\/30 {
+  color: #64748B !important;
+}
+
+/* Borders */
+html.light .border-white\/5,
+html.light .border-white\/6,
+html.light .border-white\/10 {
+  border-color: #E2E8F0 !important;
+}
+
+/* Inputs & Form controls */
+html.light .bg-white\/\[0\.02\],
+html.light .bg-white\/\[0\.015\] {
+  background-color: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+}
+
+html.light input:disabled,
+html.light .cursor-not-allowed {
+  background-color: #F1F5F9 !important;
+  border-color: #E2E8F0 !important;
+  color: #94A3B8 !important;
+}
+
+html.light input::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* Select popover & options */
+html.light [data-radix-popper-content-wrapper] [role="listbox"],
+html.light [role="menu"],
+html.light div[data-radix-popper-content-wrapper] div.bg-\[\#0C1120\] {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #0F172A !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light [role="option"]:hover,
+html.light [role="option"][data-highlighted],
+html.light [role="option"].focus\:bg-white\/10 {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+/* Maintain accent and buttons */
+html.light .bg-\[\#14B8A6\] {
+  background-color: #14B8A6 !important;
+  color: #060910 !important;
+}
+
+/* Sidebar icons and collapse icon in light mode */
+html.light .brightness-0.invert,
+html.light img.brightness-0.invert {
+  filter: brightness(0) opacity(0.7) !important;
+}
+
+html.light .group:hover .brightness-0.invert,
+html.light button:hover .brightness-0.invert,
+html.light a:hover .brightness-0.invert {
+  filter: brightness(0) opacity(1) !important;
+}
+
+/* Active sidebar item in light mode */
+html.light a.bg-\[\#14B8A6\]\/12 {
+  background-color: rgba(20, 184, 166, 0.12) !important;
+  border-color: rgba(20, 184, 166, 0.35) !important;
+}
+
+html.light a.bg-\[\#14B8A6\]\/12 .brightness-0.invert,
+html.light a.bg-\[\#14B8A6\]\/12 img.brightness-0.invert {
+  filter: invert(48%) sepia(79%) saturate(497%) hue-rotate(128deg) brightness(96%) contrast(92%) !important;
+}
+
+html.light a.bg-\[\#14B8A6\]\/12 span {
+  color: #0D9488 !important;
+  font-weight: 600 !important;
+}
+
+/* Sidebar navigation item labels in light mode */
+html.light .text-white\/75 {
+  color: #334155 !important;
+}
+
+html.light .group:hover .text-white\/75,
+html.light .group-hover\:text-white:hover,
+html.light .group:hover .group-hover\:text-white {
+  color: #0F172A !important;
+}
+
+/* Hover backgrounds */
+html.light .hover\:bg-white\/5:hover,
+html.light .hover\:bg-white\/\[0\.05\]:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Edge expand button when sidebar is collapsed in light mode */
+html.light button.bg-\[\#0A0F1E\] {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  color: #334155 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light button.bg-\[\#0A0F1E\]:hover {
+  color: #0F172A !important;
+  border-color: #14B8A6 !important;
+}
+

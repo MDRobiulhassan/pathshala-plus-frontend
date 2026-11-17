@@ -60,6 +60,7 @@ export default function PracticePage() {
             <TestResult
                 result={result}
                 onViewAnswers={() => setReviewMode(true)}
+
                 onRetake={retake}
                 retaking={retaking}
             />

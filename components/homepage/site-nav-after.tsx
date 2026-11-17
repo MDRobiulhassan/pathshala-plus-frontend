@@ -48,26 +48,26 @@ export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
 
   return (
     <header className="relative z-50 w-full px-6 pt-6">
-      <div className="mx-auto flex max-w-7xl items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr]">
+      <div className="mx-auto flex max-w-7xl items-center justify-between">
 
-        <div className="flex items-center justify-start">
-          <Link
-            href="/"
-            aria-label="Home"
-            className="flex h-[52px] w-[52px] shrink-0 items-center justify-center"
-          >
-            <Image
-              src="/icons/Icon.png"
-              alt="Pathshala Logo"
-              width={42}
-              height={42}
-              className="object-contain"
-              priority
-            />
-          </Link>
-        </div>
+        {/* LEFT LOGO */}
+        <Link
+          href="/"
+          aria-label="Home"
+          className="flex h-[52px] w-[52px] shrink-0 items-center justify-center"
+        >
+          <Image
+            src="/icons/Icon.png"
+            alt="Pathshala Logo"
+            width={42}
+            height={42}
+            className="object-contain"
+            priority
+          />
+        </Link>
 
-        <nav aria-label="Primary" className="hidden md:flex items-center justify-center">
+        {/* CENTER NAV */}
+        <nav aria-label="Primary" className="hidden md:flex">
           <div
             className="
               flex
@@ -196,7 +196,7 @@ export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
               </Link>
             ))}
 
-            <div className="mt-4 pt-4 border-t border-white/[0.06] flex flex-col gap-2">
+            {/* <div className="mt-4 pt-4 border-t border-white/[0.06] flex flex-col gap-2">
               <Link
                 href={dashboardPath}
                 onClick={() => setMobileMenuOpen(false)}
@@ -243,7 +243,7 @@ export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
                 <LogOut className="size-5" />
                 Log out
               </button>
-            </div>
+            </div> */}
           </nav>
         </div>
       )}

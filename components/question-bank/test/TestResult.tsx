@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 type Props = {
     result?: TestAttemptResult | null;
     onViewAnswers?: () => void;
+    onViewCorrectAnswers?: () => void;
     onRetake?: () => void;
     retaking?: boolean;
 };
@@ -23,6 +24,7 @@ function getTimeTaken(startedAt?: string | null, finishedAt?: string | null): st
 export default function TestResult({
     result,
     onViewAnswers,
+    onViewCorrectAnswers,
     onRetake,
     retaking = false,
 }: Props) {
@@ -56,11 +58,10 @@ export default function TestResult({
                             {summary.score} <span className="text-2xl text-white/40 font-semibold">/ {summary.totalMarks}</span>
                         </div>
                         <div className="mt-3 flex items-center justify-center gap-2">
-                            <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${
-                                passed
-                                    ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
-                                    : "bg-red-500/15 border border-red-500/30 text-red-400"
-                            }`}>
+                            <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${passed
+                                ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
+                                : "bg-red-500/15 border border-red-500/30 text-red-400"
+                                }`}>
                                 {passed ? "Passed" : "Failed"} ({percentage}%)
                             </span>
                         </div>
@@ -110,6 +111,14 @@ export default function TestResult({
                             className="w-full sm:w-auto min-w-[160px] rounded-xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors cursor-pointer"
                         >
                             See Answer
+                        </button>
+                    )}
+                    {onViewCorrectAnswers && (
+                        <button
+                            onClick={onViewCorrectAnswers}
+                            className="w-full sm:w-auto min-w-[160px] rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-6 py-3 text-sm font-semibold text-emerald-400 hover:bg-emerald-500/20 transition-colors cursor-pointer"
+                        >
+                            View Submitted Answers
                         </button>
                     )}
 
