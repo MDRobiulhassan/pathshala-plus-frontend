@@ -2,6 +2,8 @@
 
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
 import { DM_Sans } from "next/font/google"
+import { useQueryClient } from "@tanstack/react-query"
+import { AUTH_SESSION_QUERY_KEY } from "@/hooks/useAuthSession"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -50,6 +52,7 @@ function SectionCard({ title, children }: { title: string; children: React.React
 }
 
 export default function ProfileInfoForm({ profile, onUpdated }: ProfileInfoFormProps) {
+  const queryClient = useQueryClient()
   const [name, setName] = useState(profile.name ?? "")
   const [phone, setPhone] = useState(profile.phone ?? "")
 
@@ -65,13 +68,52 @@ export default function ProfileInfoForm({ profile, onUpdated }: ProfileInfoFormP
   const [isLoadingOptions, setIsLoadingOptions] = useState(true)
 
   const [themePreference, setThemePreference] = useState<"dark" | "light">("dark")
-const roleLabel = profile.roles?.[0]
-  ? profile.roles[0]
-      .toLowerCase()
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ")
-  : "—"
+
+  const applyTheme = (theme: "dark" | "light") => {
+    setThemePreference(theme)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("theme", theme)
+      if (theme === "light") {
+        document.documentElement.classList.add("light")
+        document.documentElement.classList.remove("dark")
+      } else {
+        document.documentElement.classList.add("dark")
+        document.documentElement.classList.remove("light")
+      }
+    }
+  }
+
+  const handleLanguageChange = (value: string) => {
+    setPreferredLanguageCode(value)
+    if (typeof window !== "undefined") {
+      localStorage.setItem("preferredLanguage", value)
+      document.documentElement.lang = value
+    }
+  }
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("theme")
+      if (savedTheme === "light" || savedTheme === "dark") {
+        setThemePreference(savedTheme)
+        if (savedTheme === "light") {
+          document.documentElement.classList.add("light")
+          document.documentElement.classList.remove("dark")
+        } else {
+          document.documentElement.classList.add("dark")
+          document.documentElement.classList.remove("light")
+        }
+      }
+    }
+  }, [])
+
+  const roleLabel = profile.roles?.[0]
+    ? profile.roles[0]
+        .toLowerCase()
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+    : "—"
 
   useEffect(() => {
     async function loadData() {
@@ -80,14 +122,25 @@ const roleLabel = profile.roles?.[0]
         setEducationLevels(levels)
         setLanguages(langs)
 
-        const currentLang = langs.find((l) => l.name === profile.preferredLanguage)
-        if (currentLang) setPreferredLanguageCode(currentLang.code)
+        const currentLang = langs.find(
+          (l) =>
+            l.code.toLowerCase() === profile.preferredLanguage?.toLowerCase() ||
+            l.name.toLowerCase() === profile.preferredLanguage?.toLowerCase()
+        )
+        if (currentLang) {
+          setPreferredLanguageCode(currentLang.code)
+        } else if (profile.preferredLanguage) {
+          setPreferredLanguageCode(profile.preferredLanguage)
+        } else if (typeof window !== "undefined") {
+          const savedLang = localStorage.getItem("preferredLanguage")
+          if (savedLang) setPreferredLanguageCode(savedLang)
+        }
 
         const currentLevel = levels.find((lvl) => lvl.name === profile.educationLevel)
         if (currentLevel) {
           setDepartmentOptions(currentLevel.variants)
           const currentVariant = currentLevel.variants.find(
-            (v) => v.department === profile.department
+            (v) => v.department?.toLowerCase() === profile.department?.toLowerCase()
           )
           if (currentVariant) setSelectedDepartmentId(currentVariant.id.toString())
         }
@@ -98,7 +151,22 @@ const roleLabel = profile.roles?.[0]
       }
     }
     loadData()
-  }, [])
+  }, [profile.department, profile.educationLevel, profile.preferredLanguage])
+
+  useEffect(() => {
+    if (languages.length > 0 && profile.preferredLanguage) {
+      const currentLang = languages.find(
+        (l) =>
+          l.code.toLowerCase() === profile.preferredLanguage?.toLowerCase() ||
+          l.name.toLowerCase() === profile.preferredLanguage?.toLowerCase()
+      )
+      if (currentLang) {
+        setPreferredLanguageCode(currentLang.code)
+      } else {
+        setPreferredLanguageCode(profile.preferredLanguage)
+      }
+    }
+  }, [profile.preferredLanguage, languages])
 
   const onTextChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { id, value } = event.target
@@ -130,6 +198,12 @@ const roleLabel = profile.roles?.[0]
         educationLevelId: selectedDepartmentId ? Number(selectedDepartmentId) : undefined,
       })
       onUpdated(updated)
+      if (typeof window !== "undefined" && preferredLanguageCode) {
+        localStorage.setItem("preferredLanguage", preferredLanguageCode)
+        document.documentElement.lang = preferredLanguageCode
+      }
+      queryClient.setQueryData(AUTH_SESSION_QUERY_KEY, updated)
+      queryClient.invalidateQueries({ queryKey: AUTH_SESSION_QUERY_KEY })
       toast.success("Profile updated successfully")
     } catch (error) {
       console.error(error)
@@ -274,7 +348,7 @@ const roleLabel = profile.roles?.[0]
         <Label className={cn(dmSans.className, "text-[12px] font-[700] tracking-[0.57px] text-white")}>
           Language
         </Label>
-        <Select value={preferredLanguageCode} onValueChange={setPreferredLanguageCode}>
+        <Select value={preferredLanguageCode} onValueChange={handleLanguageChange}>
           <SelectTrigger
             className={cn(
               "h-[43px] w-full rounded-[12px] border-[0.8px] border-white/6 bg-white/[0.02] px-4 py-3 text-white text-[14px] font-[400] transition-all duration-200 cursor-pointer",
@@ -306,8 +380,9 @@ const roleLabel = profile.roles?.[0]
             <input
               type="radio"
               name="theme"
+              value="dark"
               checked={themePreference === "dark"}
-              onChange={() => setThemePreference("dark")}
+              onChange={() => applyTheme("dark")}
               className="h-4 w-4 accent-[#14B8A6] cursor-pointer"
             />
             <span className={cn(dmSans.className, "text-[14px] text-white")}>Dark</span>
@@ -316,8 +391,9 @@ const roleLabel = profile.roles?.[0]
             <input
               type="radio"
               name="theme"
+              value="light"
               checked={themePreference === "light"}
-              onChange={() => setThemePreference("light")}
+              onChange={() => applyTheme("light")}
               className="h-4 w-4 accent-[#14B8A6] cursor-pointer"
             />
             <span className={cn(dmSans.className, "text-[14px] text-white")}>Light</span>
