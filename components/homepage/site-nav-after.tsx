@@ -26,7 +26,7 @@ export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
   return (
     <header className="relative z-50 w-full px-6 pt-6">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
-        
+
         {/* LEFT LOGO */}
         <Link
           href="/"
@@ -170,7 +170,7 @@ export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
               </Link>
             ))}
 
-            <div className="mt-4 pt-4 border-t border-white/[0.06] flex flex-col gap-2">
+            {/* <div className="mt-4 pt-4 border-t border-white/[0.06] flex flex-col gap-2">
               <Link
                 href={dashboardPath}
                 onClick={() => setMobileMenuOpen(false)}
@@ -217,7 +217,7 @@ export function SiteNavAfterLogin({ userRole, onLogout }: Props) {
                 <LogOut className="size-5" />
                 Log out
               </button>
-            </div>
+            </div> */}
           </nav>
         </div>
       )}
